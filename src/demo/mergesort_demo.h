@@ -63,6 +63,8 @@ namespace mkr {
             if (num_elements<=1) { return; }
 
             int mid = _start+(num_elements >> 1);
+
+            // If num_elements < _granularity, it is not worth the overhead to spawn a new task.
             std::future<void> fork;
             if (num_elements>=_granularity) {
                 fork = _thread_pool->submit([_array, _temp_buffer, _start, mid, _thread_pool, _granularity]() {
@@ -72,9 +74,16 @@ namespace mkr {
             else {
                 thread_pool_mergesort(_array, _temp_buffer, _start, mid, _thread_pool, _granularity);
             }
+
             thread_pool_mergesort(_array, _temp_buffer, mid, _end, _thread_pool, _granularity);
 
+            // If num_elements < _granularity, it is not worth the overhead to spawn a new task.
             if (num_elements>=_granularity) {
+                /* If fork isn't ready, we run pending tasks on the thread pool.
+                 * If we do not run any pending task, since this function is recursive, there is a high
+                 * chance that all the threads may end up simply waiting for fork.get() and no threads
+                 * are actually doing any work, resulting in a deadlock.
+                 */
                 while (!is_future_ready(fork)) {
                     _thread_pool->run_pending_task();
                 }
@@ -91,6 +100,8 @@ namespace mkr {
             if (num_elements<=1) { return; }
 
             int mid = _start+(num_elements >> 1);
+
+            // If num_elements < _granularity, it is not worth the overhead to spawn a new thread.
             std::future<void> fork;
             if (num_elements>=_granularity) {
                 fork = std::async([_array, _temp_buffer, _start, mid, _granularity]() -> void {
@@ -102,6 +113,7 @@ namespace mkr {
             }
             async_mergesort(_array, _temp_buffer, mid, _end, _granularity);
 
+            // If num_elements < _granularity, it is not worth the overhead to spawn a new thread.
             if (num_elements>=_granularity) { fork.get(); }
 
             do_sort(_array, _temp_buffer, _start, mid, _end);
