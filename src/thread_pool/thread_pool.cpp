@@ -18,7 +18,7 @@ namespace mkr {
             }
 
             // Create the local task queues BEFORE starting the threads so that the threads do not try to pop a non-existent queue.
-            std::atomic_thread_fence(std::memory_order_release);
+            std::atomic_thread_fence(std::memory_order::release);
             // TODO: Change to std::latch once Ubuntu releases G++ 10
             --start_flag_;
             // start_flag_.count_down();
