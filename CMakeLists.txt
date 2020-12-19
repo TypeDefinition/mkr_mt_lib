@@ -19,8 +19,7 @@ file(GLOB_RECURSE SRC_FILES LIST_DIRECTORIES true CONFIGURE_DEPENDS
         "${SRC_DIR}/*.c"
         "${SRC_DIR}/*.hpp"
         "${SRC_DIR}/*.cpp")
-# add_library("mkr_multithread_library" ${SRC_FILES})
-add_executable("mkr_multithread_library" ${SRC_FILES})
+add_library("mkr_multithread_library" ${SRC_FILES})
 
 # Multithreading Library
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
