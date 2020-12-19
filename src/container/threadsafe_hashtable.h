@@ -27,9 +27,9 @@ namespace mkr {
      *
      * @tparam K The typename of the key.
      * @tparam V The typename of the value.
-     * @tparam num_buckets The number of buckets in the hashtable. Prime numbers are highly recommended.
+     * @tparam N The number of buckets in the hashtable. Prime numbers are highly recommended.
      */
-    template<typename K, typename V, std::size_t num_buckets = 47>
+    template<typename K, typename V, std::size_t N = 47>
     class threadsafe_hashtable {
     private:
         typedef std::shared_timed_mutex mutex_type;
@@ -71,7 +71,7 @@ namespace mkr {
         };
 
         // Buckets
-        bucket buckets_[num_buckets];
+        bucket buckets_[N];
         // Number of elements in the container.
         std::atomic_size_t num_elements_;
 
@@ -81,8 +81,8 @@ namespace mkr {
          */
         const bucket& get_bucket(const K& _key) const
         {
-            size_t hash = std::hash<K>{}(_key);
-            return buckets_[hash%num_buckets];
+            std::size_t hash = std::hash<K>{}(_key);
+            return buckets_[hash%N];
         }
 
         /**
@@ -92,7 +92,7 @@ namespace mkr {
         bucket& get_bucket(const K& _key)
         {
             size_t hash = std::hash<K>{}(_key);
-            return buckets_[hash%num_buckets];
+            return buckets_[hash%N];
         }
 
         /**
@@ -310,8 +310,8 @@ namespace mkr {
          */
         void clear()
         {
-            writer_lock b_locks[num_buckets];
-            for (size_t i = 0; i<num_buckets; i++) {
+            writer_lock b_locks[N];
+            for (size_t i = 0; i<N; i++) {
                 b_locks[i] = std::move(writer_lock(buckets_[i].mutex_));
                 buckets_[i].list_.clear();
             }
@@ -328,7 +328,7 @@ namespace mkr {
          * Returns the number of elements in the container.
          * @return Returns the number of elements in the container.
          */
-        size_t size() const { return num_elements_.load(); }
+        std::size_t size() const { return num_elements_.load(); }
     };
 }
 

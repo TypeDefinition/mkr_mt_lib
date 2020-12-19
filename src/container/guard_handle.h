@@ -8,16 +8,16 @@
 namespace mkr {
     /**
      * Handle to a threadsafe exclusive read, concurrent write guarded data.
-     * @tparam lock_type The typename of the mutex lock.
-     * @tparam value_type The typename of the value.
+     * @tparam L The typename of the mutex lock.
+     * @tparam V The typename of the value.
      */
-    template<typename lock_type, typename value_type>
+    template<typename L, typename V>
     class guard_handle {
     private:
         // Mutex lock.
-        lock_type lock_;
+        L lock_;
         // Value.
-        value_type* value_;
+        V* value_;
 
     public:
         /**
@@ -25,7 +25,7 @@ namespace mkr {
          * @param _lock The mutex lock.
          * @param _value The value.
          */
-        guard_handle(lock_type&& _lock, value_type* _value)
+        guard_handle(L&& _lock, V* _value)
                 :lock_(std::move(_lock)), value_(_value) { }
 
         /**
@@ -49,11 +49,11 @@ namespace mkr {
         guard_handle(const guard_handle&) = delete;
         guard_handle& operator=(const guard_handle&) = delete;
 
-        value_type* operator->() { return value_; }
-        value_type& operator*() { return *value_; }
+        V* operator->() { return value_; }
+        V& operator*() { return *value_; }
 
-        const value_type* operator->() const { return value_; }
-        const value_type& operator*() const { return *value_; }
+        const V* operator->() const { return value_; }
+        const V& operator*() const { return *value_; }
 
         /**
          * Checks if this is an empty handle.
