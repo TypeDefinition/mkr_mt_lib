@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <shared_mutex>
+#include <functional>
 #include "guard_handle.h"
 
 namespace mkr {

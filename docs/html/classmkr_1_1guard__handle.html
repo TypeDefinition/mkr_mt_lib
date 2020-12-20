@@ -123,8 +123,52 @@ class mkr::guard_handle&lt; L, V &gt;</h3>
   </table>
   </dd>
 </dl>
-
-<p class="definition">Definition at line <a class="el" href="guard__handle_8h_source.html#l00015">15</a> of file <a class="el" href="guard__handle_8h_source.html">guard_handle.h</a>.</p>
+<dl class="section warning"><dt>Warning</dt><dd>Do not hold on to a <a class="el" href="classmkr_1_1guard__handle.html">guard_handle</a> for long periods. As long as the handle exist, it is LOCKING AND BLOCKING ANOTHER THREAD! DO NOT LOCK THE SAME OBJECT MULTIPLE TIMES AT THE SAME TIME IN THE SAME THREAD. Locking a mutex that the current thread already owns is UNDEFINED BEHAVIOUR. If the <a class="el" href="classmkr_1_1guard__handle.html">guard_handle</a> exists in the same scope as the <a class="el" href="classmkr_1_1rw__guard.html">rw_guard</a> it is from, call <a class="el" href="classmkr_1_1guard__handle.html#a628fe3a8d40154163293b675ea3870da">release()</a> before they both go out of scope. Because there is a chance that the <a class="el" href="classmkr_1_1rw__guard.html">rw_guard</a> gets deleted before <a class="el" href="classmkr_1_1guard__handle.html">guard_handle</a>, and <a class="el" href="classmkr_1_1guard__handle.html">guard_handle</a> will try to release a deleted mutex, which is UNDEFINED BEHAVIOUR.</dd></dl>
+<p>GOOD: </p><div class="fragment"><div class="line"><span class="keywordtype">void</span> bar(rw_guard&lt;int&gt;* _guarded) {</div>
+<div class="line">     <span class="comment">// The wh will go out of scope and delete BEFORE _guarded.</span></div>
+<div class="line">     rw_guard&lt;int&gt;::write_handle wh = _guarded-&gt;write_lock();</div>
+<div class="line"> </div>
+<div class="line">     <span class="comment">// Do stuff...</span></div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">void</span> foo() {</div>
+<div class="line">    rw_guard&lt;int&gt; guarded;</div>
+<div class="line">    bar(&amp;guarded);</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">void</span> baz() {</div>
+<div class="line">    rw_guard&lt;int&gt; guarded;</div>
+<div class="line">    rw_guard&lt;int&gt;::write_handle wh = guarded.write_lock();</div>
+<div class="line">    <span class="comment">// The wh releases the mutex lock before it and guarded goes out of scope.</span></div>
+<div class="line">    wh.release();</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>BAD (Like, REALLY REALLY REALLY REALLY BAD): </p><div class="fragment"><div class="line"><span class="keywordtype">void</span> foo() {</div>
+<div class="line">    <span class="comment">// If guarded is destroyed before wh when they go out of scope, you&#39;re FUCKED!</span></div>
+<div class="line">    rw_guard&lt;int&gt; guarded;</div>
+<div class="line">    rw_guard&lt;int&gt;::write_handle wh = guarded.write_lock();</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">void</span> bar() {</div>
+<div class="line">    rw_guard&lt;int&gt; guarded;</div>
+<div class="line">    {</div>
+<div class="line">        <span class="comment">// Locking the same mutex twice in the same thread is UNDEFINED BEHAVIOUR.</span></div>
+<div class="line">        rw_guard&lt;int&gt;::write_handle wh = guarded.write_lock();</div>
+<div class="line">        rw_guard&lt;int&gt;::read_handle rh = guarded.read_lock();</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">class </span>my_class</div>
+<div class="line">{</div>
+<div class="line">    rw_guard&lt;int&gt;::write_handle* handle_that_never_dies;</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordtype">void</span> baz()</div>
+<div class="line">    {</div>
+<div class="line">       <span class="comment">// You are blocking every other thread out there. Prepare for deadlock.</span></div>
+<div class="line">       handle_that_never_dies = &amp;guarded.write_lock();</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+</div><!-- fragment --> 
+<p class="definition">Definition at line <a class="el" href="guard__handle_8h_source.html#l00073">73</a> of file <a class="el" href="guard__handle_8h_source.html">guard_handle.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a0b806595e5d4f65d1491dd7fc3141ce6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0b806595e5d4f65d1491dd7fc3141ce6">&#9670;&nbsp;</a></span>guard_handle() <span class="overload">[1/2]</span></h2>
@@ -169,8 +213,8 @@ template&lt;typename L , typename V &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="guard__handle_8h_source.html#l00028">28</a> of file <a class="el" href="guard__handle_8h_source.html">guard_handle.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;                :lock_(std::move(_lock)), value_(_value) { }</div>
+<p class="definition">Definition at line <a class="el" href="guard__handle_8h_source.html#l00086">86</a> of file <a class="el" href="guard__handle_8h_source.html">guard_handle.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;                :lock_(std::move(_lock)), value_(_value) { }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -206,8 +250,8 @@ template&lt;typename L , typename V &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="guard__handle_8h_source.html#l00035">35</a> of file <a class="el" href="guard__handle_8h_source.html">guard_handle.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;                :lock_(std::move(_other.lock_)), value_(_other.value_) { }</div>
+<p class="definition">Definition at line <a class="el" href="guard__handle_8h_source.html#l00093">93</a> of file <a class="el" href="guard__handle_8h_source.html">guard_handle.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;                :lock_(std::move(_other.lock_)), value_(_other.value_) { }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -266,8 +310,8 @@ template&lt;typename L , typename V &gt; </div>
 </div><div class="memdoc">
 <p>Checks if this is an empty handle. </p><dl class="section return"><dt>Returns</dt><dd>Returns true if this is an empty handle, else return false. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="guard__handle_8h_source.html#l00063">63</a> of file <a class="el" href="guard__handle_8h_source.html">guard_handle.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;{ <span class="keywordflow">return</span> value_==<span class="keyword">nullptr</span>; }</div>
+<p class="definition">Definition at line <a class="el" href="guard__handle_8h_source.html#l00121">121</a> of file <a class="el" href="guard__handle_8h_source.html">guard_handle.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;{ <span class="keywordflow">return</span> value_==<span class="keyword">nullptr</span>; }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -297,13 +341,13 @@ template&lt;typename L , typename V &gt; </div>
 </div><div class="memdoc">
 <p>Releases the handle. The handle becomes an empty handle after this operation. </p>
 
-<p class="definition">Definition at line <a class="el" href="guard__handle_8h_source.html#l00071">71</a> of file <a class="el" href="guard__handle_8h_source.html">guard_handle.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        {</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;            <span class="keywordflow">if</span> (lock_.owns_lock()) {</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                lock_.unlock();</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                value_ = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;            }</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        }</div>
+<p class="definition">Definition at line <a class="el" href="guard__handle_8h_source.html#l00129">129</a> of file <a class="el" href="guard__handle_8h_source.html">guard_handle.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;        {</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;            <span class="keywordflow">if</span> (lock_.owns_lock()) {</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;                lock_.unlock();</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;                value_ = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;            }</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;        }</div>
 </div><!-- fragment -->
 </div>
 </div>

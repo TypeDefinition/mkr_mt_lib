@@ -98,7 +98,11 @@ namespace mkr {
          */
         bool run_stolen_task(size_t _index);
 
+        /**
+         * Worker thread function.
+         */
         void worker_thread_func();
+
     public:
         thread_pool(size_t _num_threads = static_cast<size_t>(std::thread::hardware_concurrency()-1));
         ~thread_pool();

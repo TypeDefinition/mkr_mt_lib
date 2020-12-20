@@ -149,7 +149,8 @@ namespace mkr {
                 unsorted_array[i] = (int(std::rand())%_array_size);
             }
 
-            std::cout << "Number of Hardware Threads Your System Supports: " << std::thread::hardware_concurrency() << "\n" << std::endl;
+            std::cout << "Number of Hardware Threads Your System Supports: " << std::thread::hardware_concurrency()
+                      << "\n" << std::endl;
 
             if (_display_unsorted) {
                 std::cout << "Unsorted Array: ";
