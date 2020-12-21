@@ -5,9 +5,9 @@
 #ifndef MKR_MULTITHREAD_LIBRARY_MERGESORT_DEMO_H
 #define MKR_MULTITHREAD_LIBRARY_MERGESORT_DEMO_H
 
+#include "../thread_pool/thread_pool.h"
 #include <iostream>
 #include <cstring>
-#include "../thread_pool/thread_pool.h"
 
 namespace mkr {
     /**
@@ -15,6 +15,8 @@ namespace mkr {
      */
     class mergesort_demo {
     public:
+        mergesort_demo() = delete;
+
         template<typename T>
         static void do_sort(T* _array, T* _temp_buffer, int _start, int _mid, int _end)
         {

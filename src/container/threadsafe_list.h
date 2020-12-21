@@ -5,12 +5,12 @@
 #ifndef MKR_MULTITHREAD_LIBRARY_THREADSAFE_LIST_H
 #define MKR_MULTITHREAD_LIBRARY_THREADSAFE_LIST_H
 
+#include "guard_handle.h"
 #include <memory>
 #include <shared_mutex>
 #include <atomic>
 #include <functional>
 #include <optional>
-#include "guard_handle.h"
 
 namespace mkr {
     /**

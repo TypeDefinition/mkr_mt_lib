@@ -5,10 +5,10 @@
 #ifndef MKR_MULTITHREAD_LIBRARY_RW_GUARD_H
 #define MKR_MULTITHREAD_LIBRARY_RW_GUARD_H
 
+#include "guard_handle.h"
 #include <memory>
 #include <shared_mutex>
 #include <functional>
-#include "guard_handle.h"
 
 namespace mkr {
     /**
