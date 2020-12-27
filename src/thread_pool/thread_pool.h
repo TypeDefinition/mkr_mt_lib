@@ -122,12 +122,12 @@ namespace mkr {
         bool run_pending_task();
 
         /**
-         * While a future is not ready, run pending tasks.
-         * @tparam T The future type.
-         * @param _future The future to check if it is ready.
+         * While a std::future is not ready, run pending tasks.
+         * @tparam T The std::future type.
+         * @param _future The std::future to check if it is ready.
          */
         template<typename T>
-        void run_pending_tasks_while_waiting(const std::future<T>& _future)
+        void run_pending_tasks(const std::future<T>& _future)
         {
             while (!is_future_ready(_future)) {
                 run_pending_task();

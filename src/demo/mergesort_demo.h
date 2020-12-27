@@ -86,7 +86,7 @@ namespace mkr {
                  * chance that all the threads may end up simply waiting for fork.get() and no threads
                  * are actually doing any work, resulting in a deadlock.
                  */
-                _thread_pool->run_pending_tasks_while_waiting(fork);
+                _thread_pool->run_pending_tasks(fork);
                 fork.get();
             }
 
