@@ -20,6 +20,7 @@ namespace mkr {
      * @tparam T The data type of the std::future.
      * @param _future The std::future to check.
      * @return Returns true if the std::future is ready. Else, returns false.
+     * @warning The behavior is undefined if _future.valid()==false before the call to this function.
      */
     template<typename T>
     bool is_future_ready(const std::future<T>& _future)
@@ -125,6 +126,7 @@ namespace mkr {
          * While a std::future is not ready, run pending tasks.
          * @tparam T The std::future type.
          * @param _future The std::future to check if it is ready.
+         * @warning The behavior is undefined if _future.valid()==false before the call to this function.
          */
         template<typename T>
         void run_pending_tasks(const std::future<T>& _future)
