@@ -10,8 +10,9 @@ set(CMAKE_CXX_STANDARD 20)
 # Source Directory
 set(SRC_DIR "src")
 
-SET(CMAKE_CXX_FLAGS "-fsanitize=thread -std=c++2a")
-Set(CMAKE_EXE_LINKER_FLAGS "-fsanitize=thread")
+set(CMAKE_CXX_FLAGS "-std=c++2a -O3")
+# set(CMAKE_CXX_FLAGS "-std=c++2a -Og -fsanitize=thread")
+# set(CMAKE_EXE_LINKER_FLAGS "-fsanitize=thread")
 
 # Source Files
 file(GLOB_RECURSE SRC_FILES LIST_DIRECTORIES true CONFIGURE_DEPENDS

@@ -86,9 +86,7 @@ namespace mkr {
                  * chance that all the threads may end up simply waiting for fork.get() and no threads
                  * are actually doing any work, resulting in a deadlock.
                  */
-                while (!is_future_ready(fork)) {
-                    _thread_pool->run_pending_task();
-                }
+                _thread_pool->run_pending_tasks_while_waiting(fork);
                 fork.get();
             }
 
@@ -139,10 +137,10 @@ namespace mkr {
          * Therefore, if there is only a small number of elements to sort, it may be cheaper to just run it all in the current thread than to split half of it to another thread.
          * @param _display_unsorted Display the unsorted array.
          * @param _display_sorted Display the sorted array.
-         * @warning If the number of elements is too large (e.g. 5000000), std::async may not be able to handle it and freeze your system! mkr::thread_pool should work just fine though. :D
+         * @warning If the number of elements is too large (e.g. 5000000), std::async may not be able to handle it with thread-sanitizer on and freeze your system! mkr::thread_pool should work just fine though. :D
          */
         static void
-        run(int _num_loops = 4, int _array_size = 500000, int _granularity = 2000, bool _display_unsorted = false,
+        run(int _num_loops = 4, int _array_size = 5000000, int _granularity = 2000, bool _display_unsorted = false,
                 bool _display_sorted = false)
         {
             int* unsorted_array = new int[_array_size];
