@@ -88,20 +88,20 @@ namespace mkr {
 
         /**
          * Move constructor.
-         * @param _other The guard_handle to move from.
+         * @param _handle The guard_handle to move from.
          */
-        guard_handle(guard_handle&& _other) noexcept
-                :lock_(std::move(_other.lock_)), value_(_other.value_) { }
+        guard_handle(guard_handle&& _handle) noexcept
+                :lock_(std::move(_handle.lock_)), value_(_handle.value_) { }
 
         /**
          * Destructs the guard_handle.
          */
         ~guard_handle() = default;
 
-        guard_handle& operator=(guard_handle&& _other) noexcept
+        guard_handle& operator=(guard_handle&& _handle) noexcept
         {
-            lock_ = std::move(_other.lock_);
-            value_ = _other.value_;
+            lock_ = std::move(_handle.lock_);
+            value_ = _handle.value_;
         }
 
         guard_handle(const guard_handle&) = delete;

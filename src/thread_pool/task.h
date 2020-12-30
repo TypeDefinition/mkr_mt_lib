@@ -57,13 +57,13 @@ namespace mkr {
 
         /**
          * Move constructor.
-         * @param _other The other task to move from.
+         * @param _task The other task to move from.
          * @attention This constructor must be specified, otherwise calling the move constructor will result in the templated constructor being constructed.
          *            That will result in a task that creates and calls a task, which creates and calls a task, which creates and calls a task, which creates and calls...
          */
-        task(task&& _other) noexcept
+        task(task&& _task) noexcept
         {
-            function_ptr_ = std::move(_other.function_ptr_);
+            function_ptr_ = std::move(_task.function_ptr_);
         }
 
         /**
@@ -73,12 +73,12 @@ namespace mkr {
 
         /**
          * Move assignment operator.
-         * @param _other The other task to move from.
+         * @param _task The other task to move from.
          * @return This task after the move.
          */
-        task& operator=(task&& _other) noexcept
+        task& operator=(task&& _task) noexcept
         {
-            function_ptr_ = std::move(_other.function_ptr_);
+            function_ptr_ = std::move(_task.function_ptr_);
             return *this;
         }
 
