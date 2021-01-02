@@ -105,7 +105,14 @@ namespace mkr {
         void worker_thread_func();
 
     public:
+        /**
+         * Constructs the thread pool.
+         * @param _num_threads The number of worker threads the thread pool has. Must be 1 or greater.
+         */
         thread_pool(size_t _num_threads = static_cast<size_t>(std::thread::hardware_concurrency()-1));
+        /**
+         * Destructs the thread pool.
+         */
         ~thread_pool();
 
         inline size_t num_threads() const { return num_threads_; }
