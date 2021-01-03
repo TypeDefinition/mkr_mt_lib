@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 # Source Directory
 set(SRC_DIR "src")
 
+# Compiler Flags
 set(CMAKE_CXX_FLAGS "-std=c++2a -O3")
 # set(CMAKE_CXX_FLAGS "-std=c++2a -Og -fsanitize=thread")
 # set(CMAKE_EXE_LINKER_FLAGS "-fsanitize=thread")
