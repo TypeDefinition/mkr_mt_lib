@@ -37,7 +37,8 @@ namespace mkr {
         /// The number of threads in the thread pool. The number of threads must be >= 1.
         const size_t num_threads_;
         /// A flag to signal the threads to start working on tasks.
-        std::atomic_int start_flag_; // TODO: Change to std::latch once Ubuntu releases G++ 10
+        // TODO: Change to std::latch once GCC supports it.
+        std::atomic_int start_flag_;
         // std::latch start_flag_;
         /// A flag to signal the threads to stop after completing their current task.
         std::atomic_bool end_flag_;

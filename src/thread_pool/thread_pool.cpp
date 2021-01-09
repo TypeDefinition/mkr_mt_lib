@@ -18,14 +18,14 @@ namespace mkr {
             }
 
             // Create the local task queues BEFORE starting the threads so that the threads do not try to pop a non-existent queue.
-            // TODO: Change to std::latch once Ubuntu releases G++ 10
+            // TODO: Change to std::latch once GCC supports it.
             --start_flag_;
             // start_flag_.count_down();
         }
         catch (...) {
             // Set end_flag_ = true before decreasing the counter on latch, so that the worker threads do not enter the while loop.
             end_flag_ = true;
-            // TODO: Change to std::latch once Ubuntu releases G++ 10
+            // TODO: Change to std::latch once GCC supports it.
             --start_flag_;
             // start_flag_.count_down();
             throw;
@@ -93,7 +93,7 @@ namespace mkr {
 
     void thread_pool::worker_thread_func()
     {
-        // TODO: Change to std::latch once Ubuntu releases G++ 10
+        // TODO: Change to std::latch once GCC supports it.
         while (start_flag_!=0);
         // start_flag_.wait();
 
