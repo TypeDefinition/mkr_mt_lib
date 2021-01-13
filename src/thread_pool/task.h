@@ -5,6 +5,7 @@
 #ifndef MKR_MULTITHREAD_LIBRARY_TASK_H
 #define MKR_MULTITHREAD_LIBRARY_TASK_H
 
+#include <functional>
 #include <memory>
 
 namespace mkr {
@@ -29,7 +30,7 @@ namespace mkr {
             explicit templated_wrapper(Callable&& _func)
                     :func_(std::forward<Callable>(_func)) { }
             virtual ~templated_wrapper() = default;
-            virtual void operator()() { func_(); }
+            virtual void operator()() { std::invoke(func_); }
 
             // Callable might either be non-movable or non-copyable. So template_wrapper supports neither.
             // Once created, a templated_wrapper should not be moved or copied.

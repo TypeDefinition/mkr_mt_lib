@@ -5,6 +5,8 @@
 #ifndef MKR_MULTITHREAD_LIBRARY_GUARD_HANDLE_H
 #define MKR_MULTITHREAD_LIBRARY_GUARD_HANDLE_H
 
+#include <utility>
+
 namespace mkr {
     /**
      * Handle to a threadsafe exclusive read, concurrent write guarded data.
