@@ -178,6 +178,12 @@ namespace mkr {
 
             return result;
         }
+
+        static thread_pool& get_default_thread_pool()
+        {
+            static thread_pool tp{};
+            return tp;
+        }
     };
 }
 

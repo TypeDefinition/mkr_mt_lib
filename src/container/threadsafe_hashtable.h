@@ -66,8 +66,34 @@ namespace mkr {
          * Bucket containing a list of pairs.
          */
         struct bucket {
+        public:
             mutable mutex_type mutex_;
             threadsafe_list<pair> list_;
+        };
+
+        /**
+         * Match Key Function Object
+         */
+        struct match_key {
+        private:
+            const K& key_;
+        public:
+            match_key(const K& _key)
+                    :key_(_key) { }
+            bool operator()(const pair& _pair) const { return _pair.match_key(key_); }
+        };
+
+        /**
+         * Pair Supplier Function Object
+         */
+        struct pair_supplier {
+        private:
+            const K& key_;
+            std::shared_ptr<V> value_;
+        public:
+            pair_supplier(const K& _key, std::shared_ptr<V> _value)
+                    :key_(_key), value_(_value) { }
+            pair operator()(void) const { return pair(key_, value_); }
         };
 
         // Buckets
@@ -103,14 +129,12 @@ namespace mkr {
          */
         bool do_insert(const K& _key, std::shared_ptr<V> _value)
         {
-            std::function<bool(const pair&)> match_key = [&_key](const pair& _pair) { return _pair.match_key(_key); };
-
             // Lock bucket so that no other threads can add to the bucket at the same time.
             bucket& b = get_bucket(_key);
             writer_lock b_lock(b.mutex_);
 
             // If the bucket does not contain they key, add the new pair to the bucket and return true.
-            if (b.list_.match_none(match_key)) {
+            if (b.list_.match_none(match_key(_key))) {
                 b.list_.push_front(pair(_key, _value));
                 ++num_elements_;
                 return true;
@@ -128,15 +152,28 @@ namespace mkr {
          */
         bool do_replace(const K& _key, std::shared_ptr<V> _value)
         {
-            std::function<bool(const pair&)> match_key = [&_key](const pair& _pair) { return _pair.match_key(_key); };
-            std::function<pair(void)> supplier = [_key, _value](void) { return pair(_key, _value); };
-
             // Lock bucket so that no other threads can add to the bucket at the same time.
             bucket& b = get_bucket(_key);
             writer_lock b_lock(b.mutex_);
 
             // Return true if the pair was successfully replace, otherwise, return false.
-            return b.list_.replace_if(match_key, supplier);
+            return b.list_.replace_if(match_key(_key), pair_supplier(_key, _value));
+        }
+
+        bool do_insert_or_replace(const K& _key, std::shared_ptr<V> _value)
+        {
+            // Lock bucket so that no other threads can add to the bucket at the same time.
+            bucket& b = get_bucket(_key);
+            writer_lock b_lock(b.mutex_);
+
+            // If the bucket already contains the key, replace the value.
+            if (!b.list_.replace_if(match_key(_key), pair_supplier(_key, _value))) {
+                // Otherwise, add the key-value pair to the bucket.
+                b.list_.push_front(pair(_key, _value));
+                ++num_elements_;
+            }
+
+            return true;
         }
 
     public:
@@ -200,6 +237,16 @@ namespace mkr {
             return do_replace(_key, std::make_shared<V>(std::forward<V>(_value)));
         }
 
+        bool insert_or_replace(const K& _key, const V& _value)
+        {
+            return do_insert_or_replace(_key, std::make_shared<V>(_value));
+        }
+
+        bool insert_or_replace(const K& _key, V&& _value)
+        {
+            return do_insert_or_replace(_key, std::make_shared<V>(std::forward<V>(_value)));
+        }
+
         /**
          * Remove an existing key-value pair in the hashtable.
          * @param _key The key of the pair to remove.
@@ -207,13 +254,11 @@ namespace mkr {
          */
         bool remove(const K& _key)
         {
-            std::function<bool(const pair&)> match_key = [&_key](const pair& _pair) { return _pair.match_key(_key); };
-
             // Step 2: Lock bucket
             bucket& b = get_bucket(_key);
             writer_lock b_lock(b.mutex_);
 
-            if (b.list_.remove_if(match_key)) {
+            if (b.list_.remove_if(match_key(_key))) {
                 --num_elements_;
                 return true;
             }
@@ -227,12 +272,10 @@ namespace mkr {
          */
         std::shared_ptr<V> at(const K& _key)
         {
-            std::function<bool(const pair&)> match_key = [&_key](const pair& _pair) { return _pair.match_key(_key); };
-
             bucket& b = get_bucket(_key);
             reader_lock b_lock(b.mutex_);
 
-            std::shared_ptr<pair> p = b.list_.find_first_if(match_key);
+            std::shared_ptr<pair> p = b.list_.find_first_if(match_key(_key));
             return p ? p->get_value() : nullptr;
         }
 
@@ -243,12 +286,10 @@ namespace mkr {
          */
         std::shared_ptr<const V> at(const K& _key) const
         {
-            std::function<bool(const pair&)> match_key = [&_key](const pair& _pair) { return _pair.match_key(_key); };
-
             const bucket& b = get_bucket(_key);
             reader_lock b_lock(b.mutex_);
 
-            std::shared_ptr<const pair> p = b.list_.find_first_if(match_key);
+            std::shared_ptr<const pair> p = b.list_.find_first_if(match_key(_key));
             return p ? p->get_value() : nullptr;
         }
 
@@ -262,12 +303,10 @@ namespace mkr {
         template<typename return_type>
         std::optional<return_type> write_and_map(const K& _key, std::function<return_type(V&)> _mapper)
         {
-            std::function<bool(const pair&)> match_key = [&_key](const pair& _pair) { return _pair.match_key(_key); };
-
             bucket& b = get_bucket(_key);
             writer_lock b_lock(b.mutex_);
 
-            std::shared_ptr<pair> p = b.list_.find_first_if(match_key);
+            std::shared_ptr<pair> p = b.list_.find_first_if(match_key(_key));
             return p ? std::optional<return_type>(_mapper(*p->get_value())) : std::nullopt;
         }
 
@@ -281,12 +320,10 @@ namespace mkr {
         template<typename return_type>
         std::optional<return_type> read_and_map(const K& _key, std::function<return_type(const V&)> _mapper) const
         {
-            std::function<bool(const pair&)> match_key = [&_key](const pair& _pair) { return _pair.match_key(_key); };
-
             const bucket& b = get_bucket(_key);
             writer_lock b_lock(b.mutex_);
 
-            std::shared_ptr<const pair> p = b.list_.find_first_if(match_key);
+            std::shared_ptr<const pair> p = b.list_.find_first_if(match_key(_key));
             return p ? std::optional<return_type>(_mapper(*p->get_value())) : std::nullopt;
         }
 
@@ -297,12 +334,10 @@ namespace mkr {
          */
         bool has(const K& _key) const
         {
-            std::function<bool(const pair&)> match_key = [&_key](const pair& _pair) { return _pair.match_key(_key); };
-
             const bucket& b = get_bucket(_key);
             reader_lock b_lock(b.mutex_);
 
-            return b.list_.match_any(match_key);
+            return b.list_.match_any(match_key(_key));
         }
 
         /**
