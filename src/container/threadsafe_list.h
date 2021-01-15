@@ -29,6 +29,8 @@ namespace mkr {
      * - threadsafe_list does not have to support a non-copyable AND non-movable type.
      *
      * @tparam T The typename of the contained values.
+     *
+     * TODO: Make this more robust using C++ 20 concepts. Accept more types of callable objects and not just std::function.
      */
     template<typename T>
     class threadsafe_list {
@@ -115,7 +117,7 @@ namespace mkr {
                 // If there is a next node, lock next mutex. Else, end.
                 reader_lock next_lock(current->next_->mutex_);
                 // Check the next node's value against the predicate. If predicate passes, return true.
-                if (_predicate(*current->next_->value_)) { return true; }
+                if (std::invoke(_predicate, *current->next_->value_)) { return true; }
                 // If predicate fails, advance current node and current lock.
                 current = current->next_.get();
                 current_lock = std::move(next_lock);
@@ -172,7 +174,7 @@ namespace mkr {
                 writer_lock next_lock(current->next_->mutex_);
 
                 // If predicate passes, advance next node, and discard the "old" next node.
-                if (_predicate(*current->next_->value_)) {
+                if (std::invoke(_predicate, *current->next_->value_)) {
                     // Point to the node we want to remove so that it does not go out of scope until we are done.
                     std::unique_ptr<node> node_to_remove = std::move(current->next_);
                     // Advance next node.
@@ -216,7 +218,7 @@ namespace mkr {
                 writer_lock next_lock(current->next_->mutex_);
 
                 // If the predicate passes, replace the value.
-                if (_predicate(*current->next_->value_)) {
+                if (std::invoke(_predicate, *current->next_->value_)) {
                     current->next_->value_ = std::make_shared<T>(_supplier());
                     num_replaced++;
                 }
@@ -247,7 +249,7 @@ namespace mkr {
                 writer_lock next_lock(current->next_->mutex_);
 
                 // Let the consumer operate on the value.
-                _consumer(*current->next_->value_);
+                std::invoke(_consumer, *current->next_->value_);
 
                 // Advance current node.
                 current = current->next_.get();
@@ -273,7 +275,7 @@ namespace mkr {
                 reader_lock next_lock(current->next_->mutex_);
 
                 // Let the consumer operate on the value.
-                _consumer(*current->next_->value_);
+                std::invoke(_consumer, *current->next_->value_);
 
                 // Advance current node.
                 current = current->next_.get();
@@ -300,7 +302,7 @@ namespace mkr {
                 writer_lock next_lock(current->next_->mutex_);
 
                 // If predicate passes, advance next node, and discard the "old" next node.
-                if (_predicate(*current->next_->value_)) {
+                if (std::invoke(_predicate, *current->next_->value_)) {
                     return current->next_->value_;
                 }
 
@@ -331,7 +333,7 @@ namespace mkr {
                 writer_lock next_lock(current->next_->mutex_);
 
                 // If predicate passes, advance next node, and discard the "old" next node.
-                if (_predicate(*current->next_->value_)) {
+                if (std::invoke(_predicate, *current->next_->value_)) {
                     return std::const_pointer_cast<const T>(current->next_->value_);
                 }
 
@@ -346,13 +348,13 @@ namespace mkr {
 
         /**
          * Perform the mapper operation on the first value in the list that passes the predicate.
-         * @tparam return_type The return type of the mapper function.
+         * @tparam Output The return type of the mapper function.
          * @param _predicate Predicate to test the values.
          * @param _mapper Mapper to operate on the first value to pass the predicate.
          */
-        template<typename return_type>
-        std::optional<return_type>
-        write_and_map_first_if(std::function<bool(const T&)> _predicate, std::function<return_type(T&)> _mapper)
+        template<typename Output>
+        std::optional<Output>
+        write_and_map_first_if(std::function<bool(const T&)> _predicate, std::function<Output(T&)> _mapper)
         {
             // Get current (head) node.
             node* current = &head_;
@@ -365,8 +367,8 @@ namespace mkr {
                 writer_lock next_lock(current->next_->mutex_);
 
                 // If the predicate passes, return the result of applying the mapper on the value wrapped in an optional.
-                if (_predicate(*current->next_->value_)) {
-                    return std::optional<return_type>{_mapper(*current->next_->value_)};
+                if (std::invoke(_predicate, *current->next_->value_)) {
+                    return std::optional<Output>{std::invoke(_mapper, *current->next_->value_)};
                 }
 
                 // Advance current node.
@@ -381,13 +383,13 @@ namespace mkr {
 
         /**
          * Perform the mapper operation on the first value in the list that passes the predicate.
-         * @tparam return_type The return type of the mapper function.
+         * @tparam Output The return type of the mapper function.
          * @param _predicate Predicate to test the values.
          * @param _mapper Mapper to operate on the first value to pass the predicate.
          */
-        template<typename return_type>
-        std::optional<return_type> read_and_map_first_if(std::function<bool(const T&)> _predicate,
-                std::function<return_type(const T&)> _mapper) const
+        template<typename Output>
+        std::optional<Output> read_and_map_first_if(std::function<bool(const T&)> _predicate,
+                std::function<Output(const T&)> _mapper) const
         {
             // Get current (head) node.
             const node* current = &head_;
@@ -399,8 +401,8 @@ namespace mkr {
                 // If there is a next node, lock next mutex. Else, end.
                 reader_lock next_lock(current->next_->mutex_);
 
-                if (_predicate(*current->next_->value_)) {
-                    return std::optional<return_type>{_mapper(*current->next_->value_)};
+                if (std::invoke(_predicate, *current->next_->value_)) {
+                    return std::optional<Output>{std::invoke(_mapper, *current->next_->value_)};
                 }
 
                 // Advance current node.
@@ -411,6 +413,36 @@ namespace mkr {
 
             // If none of the values passes the predicate, return an empty optional.
             return std::nullopt;
+        }
+
+        /**
+         * Maps this list to another collection.
+         * @tparam U The return type of the mapper.
+         * @tparam V The return type of the add to collection function.
+         * @param _mapper The mapper function.
+         * @param _add_to_collection The add to collection function.
+         */
+        template<typename U, typename V>
+        void write_and_map(std::function<U(T&)> _mapper, std::function<V(U)> _add_to_collection)
+        {
+            write_each([&](T& _value) {
+                std::invoke(_add_to_collection, std::invoke(_mapper, _value));
+            });
+        }
+
+        /**
+         * Maps this list to another collection.
+         * @tparam U The return type of the mapper.
+         * @tparam V The return type of the add to collection function.
+         * @param _mapper The mapper function.
+         * @param _add_to_collection The add to collection function.
+         */
+        template<typename U, typename V>
+        void read_and_map(std::function<U(const T&)> _mapper, std::function<V(U)> _add_to_collection)
+        {
+            read_each([&](const T& _value) {
+                std::invoke(_add_to_collection, std::invoke(_mapper, _value));
+            });
         }
 
         /*

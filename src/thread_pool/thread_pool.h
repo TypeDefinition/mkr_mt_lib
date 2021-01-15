@@ -179,6 +179,10 @@ namespace mkr {
             return result;
         }
 
+        /**
+         * Get the default thread pool.
+         * @return The default thread pool.
+         */
         static thread_pool& get_default_thread_pool()
         {
             static thread_pool tp{};

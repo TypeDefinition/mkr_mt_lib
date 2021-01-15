@@ -160,6 +160,12 @@ namespace mkr {
             return b.list_.replace_if(match_key(_key), pair_supplier(_key, _value));
         }
 
+        /**
+         * Internal function to add a key-value pair into the hashtable. If the value already exists, replace the value.
+         * @param _key The key to insert or replace.
+         * @param _value The new value to insert or replace the old value.
+         * @return Returns true if the operation was successful.
+         */
         bool do_insert_or_replace(const K& _key, std::shared_ptr<V> _value)
         {
             // Lock bucket so that no other threads can add to the bucket at the same time.
@@ -237,11 +243,23 @@ namespace mkr {
             return do_replace(_key, std::make_shared<V>(std::forward<V>(_value)));
         }
 
+        /**
+         * Add a key-value pair into the hashtable. If the value already exists, replace the value.
+         * @param _key The key to insert or replace.
+         * @param _value The new value to insert or replace the old value.
+         * @return Returns true if the operation was successful.
+         */
         bool insert_or_replace(const K& _key, const V& _value)
         {
             return do_insert_or_replace(_key, std::make_shared<V>(_value));
         }
 
+        /**
+         * Add a key-value pair into the hashtable. If the value already exists, replace the value.
+         * @param _key The key to insert or replace.
+         * @param _value The new value to insert or replace the old value.
+         * @return Returns true if the operation was successful.
+         */
         bool insert_or_replace(const K& _key, V&& _value)
         {
             return do_insert_or_replace(_key, std::make_shared<V>(std::forward<V>(_value)));
@@ -307,7 +325,7 @@ namespace mkr {
             writer_lock b_lock(b.mutex_);
 
             std::shared_ptr<pair> p = b.list_.find_first_if(match_key(_key));
-            return p ? std::optional<return_type>(_mapper(*p->get_value())) : std::nullopt;
+            return p ? std::optional<return_type>{std::invoke(_mapper, *p->get_value())} : std::nullopt;
         }
 
         /**
@@ -324,7 +342,7 @@ namespace mkr {
             writer_lock b_lock(b.mutex_);
 
             std::shared_ptr<const pair> p = b.list_.find_first_if(match_key(_key));
-            return p ? std::optional<return_type>(_mapper(*p->get_value())) : std::nullopt;
+            return p ? std::optional<return_type>{std::invoke(_mapper, *p->get_value())} : std::nullopt;
         }
 
         /**
