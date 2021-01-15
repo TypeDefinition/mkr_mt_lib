@@ -29,8 +29,6 @@ namespace mkr {
      * - threadsafe_list does not have to support a non-copyable AND non-movable type.
      *
      * @tparam T The typename of the contained values.
-     *
-     * TODO: Make this more robust using C++ 20 concepts. Accept more types of callable objects and not just std::function.
      */
     template<typename T>
     class threadsafe_list {
@@ -348,13 +346,13 @@ namespace mkr {
 
         /**
          * Perform the mapper operation on the first value in the list that passes the predicate.
-         * @tparam Output The return type of the mapper function.
+         * @tparam MapperOutput The return type of the mapper function.
          * @param _predicate Predicate to test the values.
          * @param _mapper Mapper to operate on the first value to pass the predicate.
          */
-        template<typename Output>
-        std::optional<Output>
-        write_and_map_first_if(std::function<bool(const T&)> _predicate, std::function<Output(T&)> _mapper)
+        template<typename MapperOutput>
+        std::optional<MapperOutput>
+        write_and_map_first_if(std::function<bool(const T&)> _predicate, std::function<MapperOutput(T&)> _mapper)
         {
             // Get current (head) node.
             node* current = &head_;
@@ -368,7 +366,7 @@ namespace mkr {
 
                 // If the predicate passes, return the result of applying the mapper on the value wrapped in an optional.
                 if (std::invoke(_predicate, *current->next_->value_)) {
-                    return std::optional<Output>{std::invoke(_mapper, *current->next_->value_)};
+                    return std::optional<MapperOutput>{std::invoke(_mapper, *current->next_->value_)};
                 }
 
                 // Advance current node.
@@ -383,13 +381,13 @@ namespace mkr {
 
         /**
          * Perform the mapper operation on the first value in the list that passes the predicate.
-         * @tparam Output The return type of the mapper function.
+         * @tparam MapperOutput The return type of the mapper function.
          * @param _predicate Predicate to test the values.
          * @param _mapper Mapper to operate on the first value to pass the predicate.
          */
-        template<typename Output>
-        std::optional<Output> read_and_map_first_if(std::function<bool(const T&)> _predicate,
-                std::function<Output(const T&)> _mapper) const
+        template<typename MapperOutput>
+        std::optional<MapperOutput> read_and_map_first_if(std::function<bool(const T&)> _predicate,
+                std::function<MapperOutput(const T&)> _mapper) const
         {
             // Get current (head) node.
             const node* current = &head_;
@@ -402,7 +400,7 @@ namespace mkr {
                 reader_lock next_lock(current->next_->mutex_);
 
                 if (std::invoke(_predicate, *current->next_->value_)) {
-                    return std::optional<Output>{std::invoke(_mapper, *current->next_->value_)};
+                    return std::optional<MapperOutput>{std::invoke(_mapper, *current->next_->value_)};
                 }
 
                 // Advance current node.
@@ -416,32 +414,70 @@ namespace mkr {
         }
 
         /**
-         * Maps this list to another collection.
-         * @tparam U The return type of the mapper.
-         * @tparam V The return type of the add to collection function.
+         * For every value that passes the predicate, insert the result of applying the mapper on it to another collection.
+         * @tparam MapperOutput The return type of the mapper.
+         * @tparam InserterInput The input type of the inserter function.
+         * @tparam InserterOutput The return type of the inserter function.
          * @param _mapper The mapper function.
-         * @param _add_to_collection The add to collection function.
+         * @param _inserter The function to insert the mapper's return value to a collection.
          */
-        template<typename U, typename V>
-        void write_and_map(std::function<U(T&)> _mapper, std::function<V(U)> _add_to_collection)
+        template<typename MapperOutput, typename InserterInput, typename InserterOutput>
+        void write_and_map_if(std::function<bool(const T&)> _predicate, std::function<MapperOutput(T&)> _mapper,
+                std::function<InserterOutput(InserterInput)> _inserter)
         {
             write_each([&](T& _value) {
-                std::invoke(_add_to_collection, std::invoke(_mapper, _value));
+                if (std::invoke(_predicate, _value)) { std::invoke(_inserter, std::invoke(_mapper, _value)); }
             });
         }
 
         /**
-         * Maps this list to another collection.
-         * @tparam U The return type of the mapper.
-         * @tparam V The return type of the add to collection function.
+         * For every value that passes the predicate, insert the result of applying the mapper on it to another collection.
+         * @tparam MapperOutput The return type of the mapper.
+         * @tparam InserterInput The input type of the inserter function.
+         * @tparam InserterOutput The return type of the inserter function.
          * @param _mapper The mapper function.
-         * @param _add_to_collection The add to collection function.
+         * @param _inserter The function to insert the mapper's return value to a collection.
          */
-        template<typename U, typename V>
-        void read_and_map(std::function<U(const T&)> _mapper, std::function<V(U)> _add_to_collection)
+        template<typename MapperOutput, typename InserterInput, typename InserterOutput>
+        void read_and_map_if(std::function<bool(const T&)> _predicate, std::function<MapperOutput(const T&)> _mapper,
+                std::function<InserterOutput(InserterInput)> _inserter)
         {
             read_each([&](const T& _value) {
-                std::invoke(_add_to_collection, std::invoke(_mapper, _value));
+                if (std::invoke(_predicate, _value)) { std::invoke(_inserter, std::invoke(_mapper, _value)); }
+            });
+        }
+
+        /**
+         * For every value, insert the result of applying the mapper on it to another collection.
+         * @tparam MapperOutput The return type of the mapper.
+         * @tparam InserterInput The input type of the inserter function.
+         * @tparam InserterOutput The return type of the inserter function.
+         * @param _mapper The mapper function.
+         * @param _inserter The function to insert the mapper's return value to a collection.
+         */
+        template<typename MapperOutput, typename InserterInput, typename InserterOutput>
+        void write_and_map_each(std::function<MapperOutput(T&)> _mapper,
+                std::function<InserterOutput(InserterInput)> _inserter)
+        {
+            write_each([&](T& _value) {
+                std::invoke(_inserter, std::invoke(_mapper, _value));
+            });
+        }
+
+        /**
+         * For every value, insert the result of applying the mapper on it to another collection.
+         * @tparam MapperOutput The return type of the mapper.
+         * @tparam InserterInput The input type of the inserter function.
+         * @tparam InserterOutput The return type of the inserter function.
+         * @param _mapper The mapper function.
+         * @param _inserter The function to insert the mapper's return value to a collection.
+         */
+        template<typename MapperOutput, typename InserterInput, typename InserterOutput>
+        void read_and_map_each(std::function<MapperOutput(const T&)> _mapper,
+                std::function<InserterOutput(InserterInput)> _inserter)
+        {
+            read_each([&](const T& _value) {
+                std::invoke(_inserter, std::invoke(_mapper, _value));
             });
         }
 

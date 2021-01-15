@@ -313,36 +313,36 @@ namespace mkr {
 
         /**
          * Perform the mapper operation on a key-value pair.
-         * @tparam return_type The return type of the mapper function.
+         * @tparam MapperOutput The return type of the mapper function.
          * @param _key The key of the pair to perform the mapper function on.
          * @param _mapper The mapper function to perform on the key-value pair.
          * @return The result of the mapper function.
          */
-        template<typename return_type>
-        std::optional<return_type> write_and_map(const K& _key, std::function<return_type(V&)> _mapper)
+        template<typename MapperOutput>
+        std::optional<MapperOutput> write_and_map(const K& _key, std::function<MapperOutput(V&)> _mapper)
         {
             bucket& b = get_bucket(_key);
             writer_lock b_lock(b.mutex_);
 
             std::shared_ptr<pair> p = b.list_.find_first_if(match_key(_key));
-            return p ? std::optional<return_type>{std::invoke(_mapper, *p->get_value())} : std::nullopt;
+            return p ? std::optional<MapperOutput>{std::invoke(_mapper, *p->get_value())} : std::nullopt;
         }
 
         /**
          * Perform the mapper operation on a key-value pair.
-         * @tparam return_type The return type of the mapper function.
+         * @tparam MapperOutput The return type of the mapper function.
          * @param _key The key of the pair to perform the mapper function on.
          * @param _mapper The mapper function to perform on the key-value pair.
          * @return The result of the mapper function.
          */
-        template<typename return_type>
-        std::optional<return_type> read_and_map(const K& _key, std::function<return_type(const V&)> _mapper) const
+        template<typename MapperOutput>
+        std::optional<MapperOutput> read_and_map(const K& _key, std::function<MapperOutput(const V&)> _mapper) const
         {
             const bucket& b = get_bucket(_key);
             writer_lock b_lock(b.mutex_);
 
             std::shared_ptr<const pair> p = b.list_.find_first_if(match_key(_key));
-            return p ? std::optional<return_type>{std::invoke(_mapper, *p->get_value())} : std::nullopt;
+            return p ? std::optional<MapperOutput>{std::invoke(_mapper, *p->get_value())} : std::nullopt;
         }
 
         /**
