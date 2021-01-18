@@ -97,7 +97,7 @@ namespace mkr {
         while (start_flag_!=0);
         // start_flag_.wait();
 
-        std::size_t worker_index = *worker_index_lookup_.at(std::this_thread::get_id());
+        std::size_t worker_index = *worker_index_lookup_.get(std::this_thread::get_id());
         while (!end_flag_.load()) {
             if (!run_local_task(worker_index) &&
                     !run_global_task() &&
@@ -110,7 +110,7 @@ namespace mkr {
 
     bool thread_pool::run_pending_task()
     {
-        std::shared_ptr<size_t> worker_index_ptr = worker_index_lookup_.at(std::this_thread::get_id());
+        std::shared_ptr<size_t> worker_index_ptr = worker_index_lookup_.get(std::this_thread::get_id());
         if (worker_index_ptr) {
             return run_local_task(*worker_index_ptr) || run_global_task() || run_stolen_task(*worker_index_ptr);
         }

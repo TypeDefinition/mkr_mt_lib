@@ -134,8 +134,8 @@ namespace mkr {
             writer_lock b_lock(b.mutex_);
 
             // If the bucket does not contain they key, add the new pair to the bucket and return true.
-            if (b.list_.match_none(match_key(_key))) {
-                b.list_.push_front(pair(_key, _value));
+            if (b.list_.match_none(match_key{_key})) {
+                b.list_.push_front(pair{_key, _value});
                 ++num_elements_;
                 return true;
             }
@@ -157,7 +157,7 @@ namespace mkr {
             writer_lock b_lock(b.mutex_);
 
             // Return true if the pair was successfully replace, otherwise, return false.
-            return b.list_.replace_if(match_key(_key), pair_supplier(_key, _value));
+            return b.list_.replace_if(match_key{_key}, pair_supplier{_key, _value});
         }
 
         /**
@@ -173,9 +173,9 @@ namespace mkr {
             writer_lock b_lock(b.mutex_);
 
             // If the bucket already contains the key, replace the value.
-            if (!b.list_.replace_if(match_key(_key), pair_supplier(_key, _value))) {
+            if (!b.list_.replace_if(match_key{_key}, pair_supplier{_key, _value})) {
                 // Otherwise, add the key-value pair to the bucket.
-                b.list_.push_front(pair(_key, _value));
+                b.list_.push_front(pair{_key, _value});
                 ++num_elements_;
             }
 
@@ -276,7 +276,7 @@ namespace mkr {
             bucket& b = get_bucket(_key);
             writer_lock b_lock(b.mutex_);
 
-            if (b.list_.remove_if(match_key(_key))) {
+            if (b.list_.remove_if(match_key{_key})) {
                 --num_elements_;
                 return true;
             }
@@ -288,12 +288,12 @@ namespace mkr {
          * @param _key The key that the value belongs to.
          * @return Returns the value that belongs to the key. If the key does not exist in the hashtable, nullptr is returned.
          */
-        std::shared_ptr<V> at(const K& _key)
+        std::shared_ptr<V> get(const K& _key)
         {
             bucket& b = get_bucket(_key);
             reader_lock b_lock(b.mutex_);
 
-            std::shared_ptr<pair> p = b.list_.find_first_if(match_key(_key));
+            std::shared_ptr<pair> p = b.list_.find_first_if(match_key{_key});
             return p ? p->get_value() : nullptr;
         }
 
@@ -302,13 +302,40 @@ namespace mkr {
          * @param _key The key that the value belongs to.
          * @return Returns the value that belongs to the key. If the key does not exist in the hashtable, nullptr is returned.
          */
-        std::shared_ptr<const V> at(const K& _key) const
+        std::shared_ptr<const V> get(const K& _key) const
         {
             const bucket& b = get_bucket(_key);
             reader_lock b_lock(b.mutex_);
 
-            std::shared_ptr<const pair> p = b.list_.find_first_if(match_key(_key));
+            std::shared_ptr<const pair> p = b.list_.find_first_if(match_key{_key});
             return p ? p->get_value() : nullptr;
+        }
+
+        /**
+         * Returns the value that belongs to the key if it exists. Else, insert a new value and return that.
+         * @param _key The key that the value belongs to.
+         * @param _supplier A supplier to construct a new value if there is no existing one.
+         * @return The value that belongs to the key if it exists. Else, insert a new value and return that.
+         */
+        std::shared_ptr<V> get_or_insert(const K& _key, std::function<V(void)> _supplier)
+        {
+            // Check if there is already an existing value.
+            std::shared_ptr<V> existing_value = get(_key);
+            if (existing_value) { return existing_value; }
+
+            // Lock bucket so that no other threads can add to the bucket at the same time.
+            bucket& b = get_bucket(_key);
+            // If the value does not exist, we need to write-lock.
+            writer_lock b_lock(b.mutex_);
+
+            // We need to check if the value exists again, in case it was added between our first check and now.
+            std::shared_ptr<pair> p = b.list_.find_first_if(match_key{_key});
+            if (p) { return p->get_value(); }
+
+            std::shared_ptr<V> new_value = std::make_shared<V>(_supplier());
+            b.list_.push_front(pair{_key, new_value});
+            ++num_elements_;
+            return new_value;
         }
 
         /**
@@ -324,7 +351,7 @@ namespace mkr {
             bucket& b = get_bucket(_key);
             writer_lock b_lock(b.mutex_);
 
-            std::shared_ptr<pair> p = b.list_.find_first_if(match_key(_key));
+            std::shared_ptr<pair> p = b.list_.find_first_if(match_key{_key});
             return p ? std::optional<MapperOutput>{std::invoke(_mapper, *p->get_value())} : std::nullopt;
         }
 
@@ -341,7 +368,7 @@ namespace mkr {
             const bucket& b = get_bucket(_key);
             writer_lock b_lock(b.mutex_);
 
-            std::shared_ptr<const pair> p = b.list_.find_first_if(match_key(_key));
+            std::shared_ptr<const pair> p = b.list_.find_first_if(match_key{_key});
             return p ? std::optional<MapperOutput>{std::invoke(_mapper, *p->get_value())} : std::nullopt;
         }
 
@@ -355,7 +382,7 @@ namespace mkr {
             const bucket& b = get_bucket(_key);
             reader_lock b_lock(b.mutex_);
 
-            return b.list_.match_any(match_key(_key));
+            return b.list_.match_any(match_key{_key});
         }
 
         /**

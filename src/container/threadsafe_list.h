@@ -232,9 +232,11 @@ namespace mkr {
 
         /**
          * Perform the consumer operation on each value in the list.
+         * @tparam ConsumerOutput The return type of the consumer function.
          * @param _consumer Consumer to operate on the values.
          */
-        void write_each(std::function<void(T&)> _consumer)
+        template<class ConsumerOutput>
+        void write_each(std::function<ConsumerOutput(T&)> _consumer)
         {
             // Get current (head) node.
             node* current = &head_;
@@ -258,9 +260,11 @@ namespace mkr {
 
         /**
          * Perform the consumer operation on each value in the list.
+         * @tparam ConsumerOutput The return type of the consumer function.
          * @param _consumer Consumer to operate on the values.
          */
-        void read_each(std::function<void(const T&)> _consumer) const
+        template<class ConsumerOutput>
+        void read_each(std::function<ConsumerOutput(const T&)> _consumer) const
         {
             // Get current (head) node.
             const node* current = &head_;
