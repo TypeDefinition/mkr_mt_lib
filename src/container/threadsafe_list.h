@@ -155,9 +155,10 @@ namespace mkr {
         /**
          * Remove all values in the list that passes the predicate.
          * @param _predicate Predicate to test if a value should be removed.
+         * @param _limit The maximum number of values to remove.
          * @return The number of values removed.
          */
-        size_t remove_if(std::function<bool(const T&)> _predicate)
+        size_t remove_if(std::function<bool(const T&)> _predicate, size_t _limit = SIZE_MAX)
         {
             // Remove counter.
             size_t num_removed = 0;
@@ -167,7 +168,7 @@ namespace mkr {
             writer_lock current_lock(current->mutex_);
 
             // Get next node
-            while (current->next_) {
+            while (_limit && current->next_) {
                 // If there is a next node, lock next mutex. Else, end.
                 writer_lock next_lock(current->next_->mutex_);
 
@@ -183,6 +184,8 @@ namespace mkr {
                     --num_elements_;
                     // Increase remove counter.
                     num_removed++;
+                    // Decrease limit counter.
+                    --_limit;
                 }
                     // If predicate fails, advance current node.
                 else {
@@ -200,9 +203,11 @@ namespace mkr {
          * Replace the value if it passes the predicate.
          * @param _predicate Predicate to test if a value should be replaced.
          * @param _supplier Supplier to generate the replacement value.
+         * * @param _limit The maximum number of values to replace.
          * @return The number of values replaced.
          */
-        size_t replace_if(std::function<bool(const T&)> _predicate, std::function<T(void)> _supplier)
+        size_t
+        replace_if(std::function<bool(const T&)> _predicate, std::function<T(void)> _supplier, size_t _limit = SIZE_MAX)
         {
             size_t num_replaced = 0;
             // Get current (head) node.
@@ -211,14 +216,17 @@ namespace mkr {
             writer_lock current_lock(head_.mutex_);
 
             // Get next node
-            while (current->next_) {
+            while (_limit && current->next_) {
                 // If there is a next node, lock next mutex. Else, end.
                 writer_lock next_lock(current->next_->mutex_);
 
                 // If the predicate passes, replace the value.
                 if (std::invoke(_predicate, *current->next_->value_)) {
                     current->next_->value_ = std::make_shared<T>(_supplier());
+                    // Increase the replace counter.
                     num_replaced++;
+                    // Decrease limit counter.
+                    --_limit;
                 }
 
                 // Advance current node.
