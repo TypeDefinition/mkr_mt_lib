@@ -40,6 +40,18 @@ namespace mkr {
             std::shared_ptr<T> value_;
             /// Next node.
             std::unique_ptr<node> next_;
+
+            /**
+             * Copy this node and the following nodes.
+             * @return A copy this node and the following nodes.
+             */
+            std::unique_ptr<node> copy() const
+            {
+                std::unique_ptr<node> copied_node = std::make_unique<node>();
+                copied_node->value_ = std::make_shared<T>(*value_);
+                copied_node->next_ = next_ ? std::move(next_->copy()) : nullptr;
+                return copied_node;
+            }
         };
 
         /// Mutex of the top of the stack.
@@ -96,12 +108,38 @@ namespace mkr {
                 :num_elements_(0) { }
 
         /**
+         * Copy constructor.
+         * @param _threadsafe_stack The threadsafe_stack to copy.
+         */
+        threadsafe_stack(const threadsafe_stack& _threadsafe_stack)
+        {
+            // Lock the top mutex.
+            std::lock_guard<mutex_type> lock(_threadsafe_stack.top_mutex_);
+            // Set the element counter.
+            num_elements_ = _threadsafe_stack.num_elements_.load();
+            // Copy Nodes
+            top_ = _threadsafe_stack.top_ ? std::move(_threadsafe_stack.top_->copy()) : nullptr;
+        }
+
+        /**
+         * Move constructor.
+         * @param _threadsafe_stack The threadsafe_stack to copy.
+         */
+        threadsafe_stack(threadsafe_stack&& _threadsafe_stack)
+        {
+            // Lock the top mutex.
+            std::lock_guard<mutex_type> lock(_threadsafe_stack.top_mutex_);
+            // Set the element counter.
+            num_elements_ = _threadsafe_stack.num_elements_.load();
+            // Copy Nodes
+            top_ = _threadsafe_stack.top_ ? std::move(_threadsafe_stack.top_->copy()) : nullptr;
+        }
+
+        /**
          * Destructs the stack.
          */
-        ~threadsafe_stack() = default;
+        ~threadsafe_stack() { }
 
-        threadsafe_stack(const threadsafe_stack&) = delete;
-        threadsafe_stack(threadsafe_stack&&) = delete;
         threadsafe_stack operator=(const threadsafe_stack&) = delete;
         threadsafe_stack operator=(threadsafe_stack&&) = delete;
 

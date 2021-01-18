@@ -89,12 +89,34 @@ namespace mkr {
                 :num_elements_(0) { }
 
         /**
+         * Copy constructor. There is no guarantee that the order of elements is preserved.
+         * @param _threadsafe_list The threadsafe_list to copy.
+         */
+        threadsafe_list(const threadsafe_list& _threadsafe_list)
+        {
+            std::function<void(const T&)> copy_func = [this](const T& _value) {
+                this->push_front(_value);
+            };
+            _threadsafe_list.read_each(copy_func);
+        }
+
+        /**
+         * Move constructor. There is no guarantee that the order of elements is preserved.
+         * @param _threadsafe_list The threadsafe_list to copy.
+         */
+        threadsafe_list(threadsafe_list&& _threadsafe_list)
+        {
+            std::function<void(const T&)> copy_func = [this](const T& _value) {
+                this->push_front(_value);
+            };
+            _threadsafe_list.read_each(copy_func);
+        }
+
+        /**
          * Destructs the list.
          */
-        ~threadsafe_list() = default;
+        ~threadsafe_list() { }
 
-        threadsafe_list(const threadsafe_list&) = delete;
-        threadsafe_list(threadsafe_list&&) = delete;
         threadsafe_list operator=(const threadsafe_list&) = delete;
         threadsafe_list operator=(threadsafe_list&&) = delete;
 

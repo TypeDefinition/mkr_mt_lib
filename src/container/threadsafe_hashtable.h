@@ -29,7 +29,7 @@ namespace mkr {
      * @tparam V The typename of the value.
      * @tparam N The number of buckets in the hashtable. Prime numbers are highly recommended.
      */
-    template<typename K, typename V, std::size_t N = 47>
+    template<typename K, typename V, std::size_t N = 61>
     class threadsafe_hashtable {
     private:
         typedef std::shared_timed_mutex mutex_type;
@@ -190,12 +190,36 @@ namespace mkr {
                 :num_elements_(0) { }
 
         /**
+         * Copy constructor. There is no guarantee that the order of elements is preserved.
+         * @param _threadsafe_hashtable The hashtable to copy.
+         */
+        threadsafe_hashtable(const threadsafe_hashtable& _threadsafe_hashtable)
+        {
+            std::function<void(const K&, const V&)> copy_func =
+                    [this](const K& _key, const V& _value) {
+                        this->insert(_key, _value);
+                    };
+            _threadsafe_hashtable.read_each(copy_func);
+        }
+
+        /**
+         * Move constructor. There is no guarantee that the order of elements is preserved.
+         * @param _threadsafe_hashtable The hashtable to copy.
+         */
+        threadsafe_hashtable(threadsafe_hashtable&& _threadsafe_hashtable)
+        {
+            std::function<void(const K&, const V&)> copy_func =
+                    [this](const K& _key, const V& _value) {
+                        this->insert(_key, _value);
+                    };
+            _threadsafe_hashtable.read_each(copy_func);
+        }
+
+        /**
          * Destructs the hashtable.
          */
-        ~threadsafe_hashtable() = default;
+        ~threadsafe_hashtable() { }
 
-        threadsafe_hashtable(const threadsafe_hashtable&) = delete;
-        threadsafe_hashtable(threadsafe_hashtable&&) = delete;
         threadsafe_hashtable operator=(const threadsafe_hashtable&) = delete;
         threadsafe_hashtable operator=(threadsafe_hashtable&&) = delete;
 
@@ -366,10 +390,48 @@ namespace mkr {
         std::optional<MapperOutput> read_and_map(const K& _key, std::function<MapperOutput(const V&)> _mapper) const
         {
             const bucket& b = get_bucket(_key);
-            writer_lock b_lock(b.mutex_);
+            reader_lock b_lock(b.mutex_);
 
             std::shared_ptr<const pair> p = b.list_.find_first_if(match_key{_key});
             return p ? std::optional<MapperOutput>{std::invoke(_mapper, *p->get_value())} : std::nullopt;
+        }
+
+        /**
+         * Perform the consumer operation on each value in the hashtable.
+         * @tparam ConsumerOutput The return type of the consumer function.
+         * @param _consumer Consumer to operate on the values.
+         */
+        template<class ConsumerOutput>
+        void write_each(std::function<ConsumerOutput(const K&, V&)> _consumer)
+        {
+            for (size_t i = 0; i<N; ++i) {
+                bucket& b = buckets_[i];
+                writer_lock b_lock(b.mutex_);
+
+                std::function<void(pair&)> consumer_wrapper = [_consumer](pair& _pair) {
+                    _consumer(_pair.get_key(), *_pair.get_value());
+                };
+                b.list_.write_each(consumer_wrapper);
+            }
+        }
+
+        /**
+         * Perform the consumer operation on each value in the hashtable.
+         * @tparam ConsumerOutput The return type of the consumer function.
+         * @param _consumer Consumer to operate on the values.
+         */
+        template<class ConsumerOutput>
+        void read_each(std::function<ConsumerOutput(const K&, const V&)> _consumer) const
+        {
+            for (size_t i = 0; i<N; ++i) {
+                const bucket& b = buckets_[i];
+                reader_lock b_lock(b.mutex_);
+
+                std::function<void(const pair&)> consumer_wrapper = [_consumer](const pair& _pair) {
+                    _consumer(_pair.get_key(), *_pair.get_value());
+                };
+                b.list_.read_each(consumer_wrapper);
+            }
         }
 
         /**

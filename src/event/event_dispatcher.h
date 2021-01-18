@@ -15,10 +15,8 @@ namespace mkr {
     class event_dispatcher {
     private:
         typedef threadsafe_list<event_listener*> listener_list;
-        typedef std::shared_ptr<listener_list> list_ptr;
-        typedef std::shared_ptr<list_ptr> list_ptr_ptr;
 
-        threadsafe_hashtable<category_id, list_ptr> listeners_;
+        threadsafe_hashtable<category_id, listener_list, 251> listeners_;
 
     public:
         event_dispatcher() { }
@@ -27,7 +25,8 @@ namespace mkr {
         template<class Event>
         void add_listener(event_listener& _listener)
         {
-            list_ptr lp = *listeners_.get_or_insert(CATEGORY_ID(event, Event), std::make_shared<listener_list>);
+            std::shared_ptr<listener_list> lp = listeners_.get_or_insert(CATEGORY_ID(event, Event),
+                    []() { return listener_list{}; });
             lp->push_front(&_listener);
         }
 
@@ -36,19 +35,19 @@ namespace mkr {
         {
             // Use get instead of map, since map will lock the mutex of the value.
             // But since our value is a threadsafe_list, it is already threadsafe and does not need a mutex.
-            list_ptr_ptr lpp = listeners_.get(CATEGORY_ID(event, Event));
-            if (!lpp) { return; }
+            std::shared_ptr<listener_list> lp = listeners_.get(CATEGORY_ID(event, Event));
+            if (!lp) { return; }
 
-            (*lpp)->remove_if(comparator<event_listener*>{&_listener}, 1);
+            lp->remove_if(comparator<event_listener*>{&_listener}, 1);
         }
 
         template<class Event>
         void dispatch_event(const Event* _event)
         {
-            list_ptr_ptr lpp = listeners_.get(CATEGORY_ID(event, Event));
-            if (!lpp) { return; }
+            std::shared_ptr<listener_list> lp = listeners_.get(CATEGORY_ID(event, Event));
+            if (!lp) { return; }
 
-            (*lpp)->write_each<void>([_event](event_listener* _listener) -> void {
+            lp->write_each<void>([_event](event_listener* _listener) -> void {
                 _listener->invoke_callback(_event);
             });
         }

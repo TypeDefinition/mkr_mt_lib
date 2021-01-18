@@ -51,6 +51,18 @@ namespace mkr {
             std::shared_ptr<T> value_;
             /// Next node.
             std::unique_ptr<node> next_;
+
+            /**
+             * Copy this node and the following nodes.
+             * @return A copy this node and the following nodes.
+             */
+            std::unique_ptr<node> copy() const
+            {
+                std::unique_ptr<node> copied_node = std::make_unique<node>();
+                copied_node->value_ = value_ ? std::make_shared<T>(*value_) : nullptr;
+                copied_node->next_ = next_ ? std::move(next_->copy()) : nullptr;
+                return copied_node;
+            }
         };
 
         /// Mutex of the head of the queue.
@@ -137,12 +149,44 @@ namespace mkr {
         }
 
         /**
+         * Copy constructor.
+         * @param _threadsafe_queue The queue to copy from.
+         */
+        threadsafe_queue(const threadsafe_queue& _threadsafe_queue)
+        {
+            // Lock the mutexes to prevent anyone from pushing.
+            std::lock_guard<mutex_type> head_lock(_threadsafe_queue.head_mutex_);
+            std::lock_guard<mutex_type> tail_lock(_threadsafe_queue.tail_mutex_);
+            // Set the element counter.
+            num_elements_ = _threadsafe_queue.num_elements_.load();
+            // Copy Nodes
+            head_ = _threadsafe_queue.head_ ? std::move(_threadsafe_queue.head_->copy()) : nullptr;
+            tail_ = head_.get();
+            while (tail_ && tail_->next_) { tail_ = tail_->next_.get(); }
+        }
+
+        /**
+         * Move constructor.
+         * @param _threadsafe_queue The queue to copy from.
+         */
+        threadsafe_queue(threadsafe_queue&& _threadsafe_queue)
+        {
+            // Lock the mutexes to prevent anyone from pushing.
+            std::lock_guard<mutex_type> head_lock(_threadsafe_queue.head_mutex_);
+            std::lock_guard<mutex_type> tail_lock(_threadsafe_queue.tail_mutex_);
+            // Set the element counter.
+            num_elements_ = _threadsafe_queue.num_elements_.load();
+            // Copy Nodes
+            head_ = _threadsafe_queue.head_ ? std::move(_threadsafe_queue.head_->copy()) : nullptr;
+            tail_ = head_.get();
+            while (tail_ && tail_->next_) { tail_ = tail_->next_.get(); }
+        }
+
+        /**
          * Destructs the stack.
          */
-        ~threadsafe_queue() = default;
+        ~threadsafe_queue() { }
 
-        threadsafe_queue(const threadsafe_queue&) = delete;
-        threadsafe_queue(threadsafe_queue&&) = delete;
         threadsafe_queue operator=(const threadsafe_queue&) = delete;
         threadsafe_queue operator=(threadsafe_queue&&) = delete;
 
