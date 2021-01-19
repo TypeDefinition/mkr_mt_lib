@@ -31,6 +31,7 @@ namespace mkr {
 
         void do_copy(const rw_guard* _rw_guard) requires std::is_copy_constructible_v<T>
         {
+            reader_lock lock(_rw_guard->value_mutex_);
             value_ = std::make_unique<T>(*_rw_guard->value_);
         }
 

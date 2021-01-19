@@ -122,6 +122,10 @@ namespace mkr {
         [[nodiscard]]
         bool empty() const { return value_==nullptr; }
 
+        /**
+         * Checks if this handle contains a value.
+         * @return Returns true if handle contains a value, else return false.
+         */
         [[nodiscard]]
         bool has_value() const { return value_!=nullptr; }
 

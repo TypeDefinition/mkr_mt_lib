@@ -27,6 +27,7 @@ namespace mkr {
         {
             std::shared_ptr<listener_list> lp = listeners_.get_or_insert(CATEGORY_ID(event, Event),
                     []() { return listener_list{}; });
+
             lp->push_front(&_listener);
         }
 

@@ -100,6 +100,16 @@ namespace mkr {
          * @param _key The key to hash to find the bucket.
          * @return The bucket the key belongs to.
          */
+        const bucket& get_bucket(const K& _key) const
+        {
+            size_t hash = std::hash<K>{}(_key);
+            return buckets_[hash%N];
+        }
+
+        /**
+         * @param _key The key to hash to find the bucket.
+         * @return The bucket the key belongs to.
+         */
         bucket& get_bucket(const K& _key)
         {
             size_t hash = std::hash<K>{}(_key);
