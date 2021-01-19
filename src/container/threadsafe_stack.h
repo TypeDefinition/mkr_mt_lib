@@ -54,15 +54,6 @@ namespace mkr {
             }
         };
 
-        /// Mutex of the top of the stack.
-        mutable mutex_type top_mutex_;
-        /// Condition variable to notify waiting threads of a push.
-        std::condition_variable_any cond_;
-        /// Top node of the stack.
-        std::unique_ptr<node> top_;
-        /// Number of elements in the stack.
-        std::atomic_size_t num_elements_;
-
         /**
          * Internal function to push a new value onto the top of the stack.
          * @param _value The value to push onto the top of the stack.
@@ -100,6 +91,25 @@ namespace mkr {
             return head_data;
         }
 
+        void do_copy_construct(const threadsafe_stack* _threadsafe_stack) requires std::is_copy_constructible_v<T>
+        {
+            // Lock the top mutex.
+            std::lock_guard<mutex_type> lock(_threadsafe_stack->top_mutex_);
+            // Set the element counter.
+            num_elements_ = _threadsafe_stack->num_elements_.load();
+            // Copy Nodes
+            top_ = _threadsafe_stack->top_ ? std::move(_threadsafe_stack->top_->copy()) : nullptr;
+        }
+
+        /// Mutex of the top of the stack.
+        mutable mutex_type top_mutex_;
+        /// Condition variable to notify waiting threads of a push.
+        std::condition_variable_any cond_;
+        /// Top node of the stack.
+        std::unique_ptr<node> top_;
+        /// Number of elements in the stack.
+        std::atomic_size_t num_elements_;
+
     public:
         /**
          * Constructs the stack.
@@ -113,12 +123,7 @@ namespace mkr {
          */
         threadsafe_stack(const threadsafe_stack& _threadsafe_stack)
         {
-            // Lock the top mutex.
-            std::lock_guard<mutex_type> lock(_threadsafe_stack.top_mutex_);
-            // Set the element counter.
-            num_elements_ = _threadsafe_stack.num_elements_.load();
-            // Copy Nodes
-            top_ = _threadsafe_stack.top_ ? std::move(_threadsafe_stack.top_->copy()) : nullptr;
+            do_copy_construct(&_threadsafe_stack);
         }
 
         /**
@@ -127,12 +132,7 @@ namespace mkr {
          */
         threadsafe_stack(threadsafe_stack&& _threadsafe_stack)
         {
-            // Lock the top mutex.
-            std::lock_guard<mutex_type> lock(_threadsafe_stack.top_mutex_);
-            // Set the element counter.
-            num_elements_ = _threadsafe_stack.num_elements_.load();
-            // Copy Nodes
-            top_ = _threadsafe_stack.top_ ? std::move(_threadsafe_stack.top_->copy()) : nullptr;
+            do_copy_construct(&_threadsafe_stack);
         }
 
         /**

@@ -12,6 +12,7 @@
 #include <atomic>
 #include <functional>
 #include <optional>
+#include <type_traits>
 
 namespace mkr {
     /**
@@ -76,6 +77,14 @@ namespace mkr {
             ++num_elements_;
         }
 
+        void do_copy_constructor(const threadsafe_list* _threadsafe_list) requires std::is_copy_constructible_v<T>
+        {
+            std::function<void(const T&)> copy_func = [this](const T& _value) {
+                this->push_front(_value);
+            };
+            _threadsafe_list->read_each(copy_func);
+        }
+
         /// Dummy head node with no value. Nodes containing values start from head_->next_;
         node head_;
         /// Number of elements in the queue.
@@ -94,10 +103,7 @@ namespace mkr {
          */
         threadsafe_list(const threadsafe_list& _threadsafe_list)
         {
-            std::function<void(const T&)> copy_func = [this](const T& _value) {
-                this->push_front(_value);
-            };
-            _threadsafe_list.read_each(copy_func);
+            do_copy_constructor(&_threadsafe_list);
         }
 
         /**
@@ -106,10 +112,7 @@ namespace mkr {
          */
         threadsafe_list(threadsafe_list&& _threadsafe_list)
         {
-            std::function<void(const T&)> copy_func = [this](const T& _value) {
-                this->push_front(_value);
-            };
-            _threadsafe_list.read_each(copy_func);
+            do_copy_constructor(&_threadsafe_list);
         }
 
         /**

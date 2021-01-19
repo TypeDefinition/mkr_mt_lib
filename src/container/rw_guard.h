@@ -10,6 +10,7 @@
 #include <memory>
 #include <shared_mutex>
 #include <functional>
+#include <type_traits>
 
 namespace mkr {
     /**
@@ -27,6 +28,11 @@ namespace mkr {
         typedef std::shared_timed_mutex mutex_type;
         typedef std::unique_lock<mutex_type> writer_lock;
         typedef std::shared_lock<mutex_type> reader_lock;
+
+        void do_copy(const rw_guard* _rw_guard) requires std::is_copy_constructible_v<T>
+        {
+            value_ = std::make_unique<T>(*_rw_guard->value_);
+        }
 
         mutable mutex_type value_mutex_;
         std::unique_ptr<T> value_;
@@ -49,8 +55,24 @@ namespace mkr {
          */
         ~rw_guard() { }
 
-        rw_guard(const rw_guard&) = delete;
-        rw_guard(rw_guard&&) = delete;
+        /**
+         * Copy constructor.
+         * @param _rw_guard The rw_guard to copy.
+         */
+        rw_guard(const rw_guard& _rw_guard)
+        {
+            do_copy(&_rw_guard);
+        }
+
+        /**
+         * Move constructor.
+         * @param _rw_guard The rw_guard to copy.
+         */
+        rw_guard(rw_guard&& _rw_guard)
+        {
+            do_copy(&_rw_guard);
+        }
+
         rw_guard& operator=(const rw_guard&) = delete;
         rw_guard& operator=(rw_guard&&) = delete;
 

@@ -65,19 +65,6 @@ namespace mkr {
             }
         };
 
-        /// Mutex of the head of the queue.
-        mutable mutex_type head_mutex_;
-        /// Mutex of the tail of the queue.
-        mutable mutex_type tail_mutex_;
-        /// Condition variable to notify waiting threads of a push.
-        std::condition_variable_any cond_;
-        /// Head node of the queue.
-        std::unique_ptr<node> head_;
-        /// Tail node of the queue.
-        node* tail_;
-        /// Number of elements in the queue.
-        std::atomic_size_t num_elements_;
-
         /**
          * Get the tail node.
          * @return The tail node.
@@ -135,6 +122,32 @@ namespace mkr {
             return old_head->value_;
         }
 
+        void do_copy_construct(const threadsafe_queue* _threadsafe_queue) requires std::is_copy_constructible_v<T>
+        {
+            // Lock the mutexes to prevent anyone from pushing.
+            std::lock_guard<mutex_type> head_lock(_threadsafe_queue->head_mutex_);
+            std::lock_guard<mutex_type> tail_lock(_threadsafe_queue->tail_mutex_);
+            // Set the element counter.
+            num_elements_ = _threadsafe_queue->num_elements_.load();
+            // Copy Nodes
+            head_ = _threadsafe_queue->head_ ? std::move(_threadsafe_queue->head_->copy()) : nullptr;
+            tail_ = head_.get();
+            while (tail_ && tail_->next_) { tail_ = tail_->next_.get(); }
+        }
+
+        /// Mutex of the head of the queue.
+        mutable mutex_type head_mutex_;
+        /// Mutex of the tail of the queue.
+        mutable mutex_type tail_mutex_;
+        /// Condition variable to notify waiting threads of a push.
+        std::condition_variable_any cond_;
+        /// Head node of the queue.
+        std::unique_ptr<node> head_;
+        /// Tail node of the queue.
+        node* tail_;
+        /// Number of elements in the queue.
+        std::atomic_size_t num_elements_;
+
     public:
         /**
          * Constructs the queue.
@@ -154,15 +167,7 @@ namespace mkr {
          */
         threadsafe_queue(const threadsafe_queue& _threadsafe_queue)
         {
-            // Lock the mutexes to prevent anyone from pushing.
-            std::lock_guard<mutex_type> head_lock(_threadsafe_queue.head_mutex_);
-            std::lock_guard<mutex_type> tail_lock(_threadsafe_queue.tail_mutex_);
-            // Set the element counter.
-            num_elements_ = _threadsafe_queue.num_elements_.load();
-            // Copy Nodes
-            head_ = _threadsafe_queue.head_ ? std::move(_threadsafe_queue.head_->copy()) : nullptr;
-            tail_ = head_.get();
-            while (tail_ && tail_->next_) { tail_ = tail_->next_.get(); }
+            do_copy_construct(&_threadsafe_queue);
         }
 
         /**
@@ -171,15 +176,7 @@ namespace mkr {
          */
         threadsafe_queue(threadsafe_queue&& _threadsafe_queue)
         {
-            // Lock the mutexes to prevent anyone from pushing.
-            std::lock_guard<mutex_type> head_lock(_threadsafe_queue.head_mutex_);
-            std::lock_guard<mutex_type> tail_lock(_threadsafe_queue.tail_mutex_);
-            // Set the element counter.
-            num_elements_ = _threadsafe_queue.num_elements_.load();
-            // Copy Nodes
-            head_ = _threadsafe_queue.head_ ? std::move(_threadsafe_queue.head_->copy()) : nullptr;
-            tail_ = head_.get();
-            while (tail_ && tail_->next_) { tail_ = tail_->next_.get(); }
+            do_copy_construct(&_threadsafe_queue);
         }
 
         /**

@@ -96,21 +96,6 @@ namespace mkr {
             pair operator()(void) const { return pair(key_, value_); }
         };
 
-        // Buckets
-        bucket buckets_[N];
-        // Number of elements in the container.
-        std::atomic_size_t num_elements_;
-
-        /**
-         * @param _key The key to hash to find the bucket.
-         * @return The bucket the key belongs to.
-         */
-        const bucket& get_bucket(const K& _key) const
-        {
-            std::size_t hash = std::hash<K>{}(_key);
-            return buckets_[hash%N];
-        }
-
         /**
          * @param _key The key to hash to find the bucket.
          * @return The bucket the key belongs to.
@@ -182,6 +167,21 @@ namespace mkr {
             return true;
         }
 
+        void
+        do_copy_construct(const threadsafe_hashtable* _threadsafe_hashtable) requires std::is_copy_constructible_v<V>
+        {
+            std::function<void(const K&, const V&)> copy_func =
+                    [this](const K& _key, const V& _value) {
+                        this->insert(_key, _value);
+                    };
+            _threadsafe_hashtable->read_each(copy_func);
+        }
+
+        // Buckets
+        bucket buckets_[N];
+        // Number of elements in the container.
+        std::atomic_size_t num_elements_;
+
     public:
         /**
          * Constructs the hashtable.
@@ -195,11 +195,7 @@ namespace mkr {
          */
         threadsafe_hashtable(const threadsafe_hashtable& _threadsafe_hashtable)
         {
-            std::function<void(const K&, const V&)> copy_func =
-                    [this](const K& _key, const V& _value) {
-                        this->insert(_key, _value);
-                    };
-            _threadsafe_hashtable.read_each(copy_func);
+            do_copy_construct(&_threadsafe_hashtable);
         }
 
         /**
@@ -208,11 +204,7 @@ namespace mkr {
          */
         threadsafe_hashtable(threadsafe_hashtable&& _threadsafe_hashtable)
         {
-            std::function<void(const K&, const V&)> copy_func =
-                    [this](const K& _key, const V& _value) {
-                        this->insert(_key, _value);
-                    };
-            _threadsafe_hashtable.read_each(copy_func);
+            do_copy_construct(&_threadsafe_hashtable);
         }
 
         /**
