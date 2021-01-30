@@ -6,9 +6,12 @@
 #define MKR_MULTITHREAD_LIBRARY_EVENT_H
 
 namespace mkr {
+    /// A base class for events.
     class event {
     public:
+        /// Constructs the event.
         event() { }
+        /// Destructs the event.
         virtual ~event() { }
     };
 }
