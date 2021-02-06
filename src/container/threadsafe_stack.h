@@ -5,10 +5,13 @@
 #ifndef MKR_MULTITHREAD_LIBRARY_THREADSAFE_STACK_H
 #define MKR_MULTITHREAD_LIBRARY_THREADSAFE_STACK_H
 
+#include "container.h"
+
 #include <memory>
 #include <mutex>
 #include <atomic>
 #include <condition_variable>
+#include <concepts>
 
 namespace mkr {
     /**
@@ -28,7 +31,7 @@ namespace mkr {
      * @tparam T The typename of the contained values.
      */
     template<typename T>
-    class threadsafe_stack {
+    class threadsafe_stack : public container {
     private:
         typedef std::timed_mutex mutex_type;
 
@@ -91,7 +94,7 @@ namespace mkr {
             return head_data;
         }
 
-        void do_copy_construct(const threadsafe_stack* _threadsafe_stack) requires std::is_copy_constructible_v<T>
+        void do_copy_construct(const threadsafe_stack* _threadsafe_stack) requires std::copyable<T>
         {
             // Lock the top mutex.
             std::lock_guard<mutex_type> lock(_threadsafe_stack->top_mutex_);
@@ -138,7 +141,7 @@ namespace mkr {
         /**
          * Destructs the stack.
          */
-        ~threadsafe_stack() { }
+        virtual ~threadsafe_stack() { }
 
         threadsafe_stack operator=(const threadsafe_stack&) = delete;
         threadsafe_stack operator=(threadsafe_stack&&) = delete;

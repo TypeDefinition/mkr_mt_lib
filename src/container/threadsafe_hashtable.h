@@ -30,7 +30,7 @@ namespace mkr {
      * @tparam N The number of buckets in the hashtable. Prime numbers are highly recommended.
      */
     template<typename K, typename V, std::size_t N = 61>
-    class threadsafe_hashtable {
+    class threadsafe_hashtable : public container {
     private:
         typedef std::shared_timed_mutex mutex_type;
         typedef std::unique_lock<mutex_type> writer_lock;
@@ -177,8 +177,7 @@ namespace mkr {
             return true;
         }
 
-        void
-        do_copy_construct(const threadsafe_hashtable* _threadsafe_hashtable) requires std::is_copy_constructible_v<V>
+        void do_copy_construct(const threadsafe_hashtable* _threadsafe_hashtable) requires std::copyable<V>
         {
             std::function<void(const K&, const V&)> copy_func =
                     [this](const K& _key, const V& _value) {
@@ -220,7 +219,7 @@ namespace mkr {
         /**
          * Destructs the hashtable.
          */
-        ~threadsafe_hashtable() { }
+        virtual ~threadsafe_hashtable() { }
 
         threadsafe_hashtable operator=(const threadsafe_hashtable&) = delete;
         threadsafe_hashtable operator=(threadsafe_hashtable&&) = delete;

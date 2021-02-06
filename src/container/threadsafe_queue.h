@@ -5,10 +5,13 @@
 #ifndef MKR_MULTITHREAD_LIBRARY_THREADSAFE_QUEUE_H
 #define MKR_MULTITHREAD_LIBRARY_THREADSAFE_QUEUE_H
 
+#include "container.h"
+
 #include <memory>
 #include <mutex>
 #include <atomic>
 #include <condition_variable>
+#include <concepts>
 
 namespace mkr {
     /**
@@ -33,7 +36,7 @@ namespace mkr {
      * @tparam T The typename of the contained values.
      */
     template<typename T>
-    class threadsafe_queue {
+    class threadsafe_queue : public container {
     private:
         typedef std::timed_mutex mutex_type;
 
@@ -122,7 +125,7 @@ namespace mkr {
             return old_head->value_;
         }
 
-        void do_copy_construct(const threadsafe_queue* _threadsafe_queue) requires std::is_copy_constructible_v<T>
+        void do_copy_construct(const threadsafe_queue* _threadsafe_queue) requires std::copyable<T>
         {
             // Lock the mutexes to prevent anyone from pushing.
             std::lock_guard<mutex_type> head_lock(_threadsafe_queue->head_mutex_);
@@ -182,7 +185,7 @@ namespace mkr {
         /**
          * Destructs the stack.
          */
-        ~threadsafe_queue() { }
+        virtual ~threadsafe_queue() { }
 
         threadsafe_queue operator=(const threadsafe_queue&) = delete;
         threadsafe_queue operator=(threadsafe_queue&&) = delete;

@@ -5,12 +5,15 @@
 #ifndef MKR_MULTITHREAD_LIBRARY_THREADSAFE_LIST_H
 #define MKR_MULTITHREAD_LIBRARY_THREADSAFE_LIST_H
 
+#include "container.h"
+
 #include <memory>
 #include <shared_mutex>
 #include <atomic>
 #include <functional>
 #include <optional>
 #include <type_traits>
+#include <concepts>
 
 namespace mkr {
     /**
@@ -30,7 +33,7 @@ namespace mkr {
      * @tparam T The typename of the contained values.
      */
     template<typename T>
-    class threadsafe_list {
+    class threadsafe_list : public container {
     private:
         typedef std::shared_timed_mutex mutex_type;
         typedef std::unique_lock<mutex_type> writer_lock;
@@ -75,7 +78,11 @@ namespace mkr {
             ++num_elements_;
         }
 
-        void do_copy_constructor(const threadsafe_list* _threadsafe_list) requires std::is_copy_constructible_v<T>
+        /**
+         * Internal copy constructor helper function.
+         * @param _threadsafe_list The threadsafe_list to copy.
+         */
+        void do_copy_constructor(const threadsafe_list* _threadsafe_list) requires std::copyable<T>
         {
             std::function<void(const T&)> copy_func = [this](const T& _value) {
                 this->push_front(_value);
@@ -116,7 +123,7 @@ namespace mkr {
         /**
          * Destructs the list.
          */
-        ~threadsafe_list() { }
+        virtual ~threadsafe_list() { }
 
         threadsafe_list operator=(const threadsafe_list&) = delete;
         threadsafe_list operator=(threadsafe_list&&) = delete;
@@ -126,7 +133,8 @@ namespace mkr {
          * @param _predicate Predicate to test the values.
          * @return Returns true if any of the values in the list passes the predicate. Else, returns false.
          */
-        bool match_any(std::function<bool(const T&)> _predicate) const
+        template<class Predicate>
+        bool match_any(Predicate&& _predicate) const requires std::predicate<Predicate, const T&>
         {
             // Get current (head) node.
             const node* current = &head_;
@@ -138,7 +146,9 @@ namespace mkr {
                 // If there is a next node, lock next mutex. Else, end.
                 reader_lock next_lock(current->next_->mutex_);
                 // Check the next node's value against the predicate. If predicate passes, return true.
-                if (std::invoke(_predicate, *current->next_->value_)) { return true; }
+                if (std::invoke(std::forward<Predicate>(_predicate), *current->next_->value_)) {
+                    return true;
+                }
                 // If predicate fails, advance current node and current lock.
                 current = current->next_.get();
                 current_lock = std::move(next_lock);
@@ -153,7 +163,11 @@ namespace mkr {
          * @param _predicate Predicate to test the values.
          * @return Returns false if any of the values in the list passes the predicate. Else, returns true.
          */
-        bool match_none(std::function<bool(const T&)> _predicate) const { return !match_any(_predicate); }
+        template<class Predicate>
+        bool match_none(Predicate&& _predicate) const requires std::predicate<Predicate, const T&>
+        {
+            return !match_any(std::forward<Predicate>(_predicate));
+        }
 
         /**
          * Adds a new value to the front of the list.
@@ -181,7 +195,8 @@ namespace mkr {
          * @param _limit The maximum number of values to remove.
          * @return The number of values removed.
          */
-        size_t remove_if(std::function<bool(const T&)> _predicate, size_t _limit = SIZE_MAX)
+        template<class Predicate>
+        size_t remove_if(Predicate&& _predicate, size_t _limit = SIZE_MAX) requires std::predicate<Predicate, const T&>
         {
             // Remove counter.
             size_t num_removed = 0;
@@ -196,7 +211,7 @@ namespace mkr {
                 writer_lock next_lock(current->next_->mutex_);
 
                 // If predicate passes, advance next node, and discard the "old" next node.
-                if (std::invoke(_predicate, *current->next_->value_)) {
+                if (std::invoke(std::forward<Predicate>(_predicate), *current->next_->value_)) {
                     // Point to the node we want to remove so that it does not go out of scope until we are done.
                     std::unique_ptr<node> node_to_remove = std::move(current->next_);
                     // Advance next node.
@@ -209,14 +224,12 @@ namespace mkr {
                     num_removed++;
                     // Decrease limit counter.
                     --_limit;
+                    continue;
                 }
-                    // If predicate fails, advance current node.
-                else {
-                    // Advance current node.
-                    current = current->next_.get();
-                    // Advance current lock.
-                    current_lock = std::move(next_lock);
-                }
+
+                // If predicate fails, advance current node & lock.
+                current = current->next_.get();
+                current_lock = std::move(next_lock);
             }
 
             return num_removed;
@@ -229,8 +242,9 @@ namespace mkr {
          * * @param _limit The maximum number of values to replace.
          * @return The number of values replaced.
          */
-        size_t
-        replace_if(std::function<bool(const T&)> _predicate, std::function<T(void)> _supplier, size_t _limit = SIZE_MAX)
+        template<class Predicate>
+        size_t replace_if(Predicate&& _predicate, std::function<T(void)> _supplier,
+                size_t _limit = SIZE_MAX) requires std::predicate<Predicate, const T&>
         {
             size_t num_replaced = 0;
             // Get current (head) node.
@@ -244,7 +258,7 @@ namespace mkr {
                 writer_lock next_lock(current->next_->mutex_);
 
                 // If the predicate passes, replace the value.
-                if (std::invoke(_predicate, *current->next_->value_)) {
+                if (std::invoke(std::forward<Predicate>(_predicate), *current->next_->value_)) {
                     current->next_->value_ = std::make_shared<T>(_supplier());
                     // Increase the replace counter.
                     num_replaced++;
@@ -322,7 +336,8 @@ namespace mkr {
          * @param _predicate The predicate to test the value with.
          * @return The first value that passes the predicate. If none passes, nullptr is returned.
          */
-        std::shared_ptr<T> find_first_if(std::function<bool(const T&)> _predicate)
+        template<class Predicate>
+        std::shared_ptr<T> find_first_if(Predicate&& _predicate) requires std::predicate<Predicate, const T&>
         {
             // Get current (head) node.
             node* current = &head_;
@@ -335,7 +350,7 @@ namespace mkr {
                 writer_lock next_lock(current->next_->mutex_);
 
                 // If predicate passes, advance next node, and discard the "old" next node.
-                if (std::invoke(_predicate, *current->next_->value_)) {
+                if (std::invoke(std::forward<Predicate>(_predicate), *current->next_->value_)) {
                     return current->next_->value_;
                 }
 
@@ -353,7 +368,9 @@ namespace mkr {
          * @param _predicate The predicate to test the value with.
          * @return The first value that passes the predicate. If none passes, nullptr is returned.
          */
-        std::shared_ptr<const T> find_first_if(std::function<bool(const T&)> _predicate) const
+        template<class Predicate>
+        std::shared_ptr<const T>
+        find_first_if(Predicate&& _predicate) const requires std::predicate<Predicate, const T&>
         {
             // Get current (head) node.
             const node* current = &head_;
@@ -366,7 +383,7 @@ namespace mkr {
                 writer_lock next_lock(current->next_->mutex_);
 
                 // If predicate passes, advance next node, and discard the "old" next node.
-                if (std::invoke(_predicate, *current->next_->value_)) {
+                if (std::invoke(std::forward<Predicate>(_predicate), *current->next_->value_)) {
                     return std::const_pointer_cast<const T>(current->next_->value_);
                 }
 
@@ -385,9 +402,9 @@ namespace mkr {
          * @param _predicate Predicate to test the values.
          * @param _mapper Mapper to operate on the first value to pass the predicate.
          */
-        template<typename MapperOutput>
-        std::optional<MapperOutput>
-        write_and_map_first_if(std::function<bool(const T&)> _predicate, std::function<MapperOutput(T&)> _mapper)
+        template<typename MapperOutput, typename Predicate>
+        std::optional<MapperOutput> write_and_map_first_if(Predicate&& _predicate,
+                std::function<MapperOutput(T&)> _mapper) requires std::predicate<Predicate, const T&>
         {
             // Get current (head) node.
             node* current = &head_;
@@ -400,7 +417,7 @@ namespace mkr {
                 writer_lock next_lock(current->next_->mutex_);
 
                 // If the predicate passes, return the result of applying the mapper on the value wrapped in an optional.
-                if (std::invoke(_predicate, *current->next_->value_)) {
+                if (std::invoke(std::forward<Predicate>(_predicate), *current->next_->value_)) {
                     return std::optional<MapperOutput>{std::invoke(_mapper, *current->next_->value_)};
                 }
 
@@ -420,9 +437,9 @@ namespace mkr {
          * @param _predicate Predicate to test the values.
          * @param _mapper Mapper to operate on the first value to pass the predicate.
          */
-        template<typename MapperOutput>
-        std::optional<MapperOutput> read_and_map_first_if(std::function<bool(const T&)> _predicate,
-                std::function<MapperOutput(const T&)> _mapper) const
+        template<class MapperOutput, class Predicate>
+        std::optional<MapperOutput> read_and_map_first_if(Predicate&& _predicate,
+                std::function<MapperOutput(const T&)> _mapper) const requires std::predicate<Predicate, const T&>
         {
             // Get current (head) node.
             const node* current = &head_;
@@ -434,7 +451,7 @@ namespace mkr {
                 // If there is a next node, lock next mutex. Else, end.
                 reader_lock next_lock(current->next_->mutex_);
 
-                if (std::invoke(_predicate, *current->next_->value_)) {
+                if (std::invoke(std::forward<Predicate>(_predicate), *current->next_->value_)) {
                     return std::optional<MapperOutput>{std::invoke(_mapper, *current->next_->value_)};
                 }
 
@@ -456,12 +473,14 @@ namespace mkr {
          * @param _mapper The mapper function.
          * @param _inserter The function to insert the mapper's return value to a collection.
          */
-        template<typename MapperOutput, typename InserterInput, typename InserterOutput>
-        void write_and_map_if(std::function<bool(const T&)> _predicate, std::function<MapperOutput(T&)> _mapper,
-                std::function<InserterOutput(InserterInput)> _inserter)
+        template<typename MapperOutput, typename InserterInput, typename InserterOutput, typename Predicate>
+        void write_and_map_if(Predicate&& _predicate, std::function<MapperOutput(T&)> _mapper,
+                std::function<InserterOutput(InserterInput)> _inserter) requires std::predicate<Predicate, const T&>
         {
             write_each([&](T& _value) {
-                if (std::invoke(_predicate, _value)) { std::invoke(_inserter, std::invoke(_mapper, _value)); }
+                if (std::invoke(std::forward<Predicate>(_predicate), _value)) {
+                    std::invoke(_inserter, std::invoke(_mapper, _value));
+                }
             });
         }
 
@@ -473,12 +492,14 @@ namespace mkr {
          * @param _mapper The mapper function.
          * @param _inserter The function to insert the mapper's return value to a collection.
          */
-        template<typename MapperOutput, typename InserterInput, typename InserterOutput>
-        void read_and_map_if(std::function<bool(const T&)> _predicate, std::function<MapperOutput(const T&)> _mapper,
-                std::function<InserterOutput(InserterInput)> _inserter)
+        template<typename MapperOutput, typename InserterInput, typename InserterOutput, typename Predicate>
+        void read_and_map_if(Predicate&& _predicate, std::function<MapperOutput(const T&)> _mapper,
+                std::function<InserterOutput(InserterInput)> _inserter) requires std::predicate<Predicate, const T&>
         {
             read_each([&](const T& _value) {
-                if (std::invoke(_predicate, _value)) { std::invoke(_inserter, std::invoke(_mapper, _value)); }
+                if (std::invoke(std::forward<Predicate>(_predicate), _value)) {
+                    std::invoke(_inserter, std::invoke(_mapper, _value));
+                }
             });
         }
 
