@@ -342,7 +342,8 @@ namespace mkr {
          * @param _supplier A supplier to construct a new value if there is no existing one.
          * @return The value that belongs to the key if it exists. Else, insert a new value and return that.
          */
-        std::shared_ptr<V> get_or_insert(const K& _key, std::function<V(void)> _supplier)
+        template<class Supplier>
+        std::shared_ptr<V> get_or_insert(const K& _key, Supplier&& _supplier) requires mkr::is_supplier<Supplier, V>
         {
             // Check if there is already an existing value.
             std::shared_ptr<V> existing_value = get(_key);
@@ -357,7 +358,7 @@ namespace mkr {
             std::shared_ptr<pair> p = b.list_.find_first_if(match_key{_key});
             if (p) { return p->get_value(); }
 
-            std::shared_ptr<V> new_value = std::make_shared<V>(_supplier());
+            std::shared_ptr<V> new_value = std::make_shared<V>(std::invoke(std::forward<Supplier>(_supplier)));
             b.list_.push_front(pair{_key, new_value});
             ++num_elements_;
             return new_value;
@@ -399,18 +400,18 @@ namespace mkr {
 
         /**
          * Perform the consumer operation on each value in the hashtable.
-         * @tparam ConsumerOutput The return type of the consumer function.
          * @param _consumer Consumer to operate on the values.
          */
-        template<class ConsumerOutput>
-        void write_each(std::function<ConsumerOutput(const K&, V&)> _consumer)
+        template<class Consumer>
+        void write_each(Consumer&& _consumer) requires mkr::is_consumer<Consumer, const K&, V&>
         {
             for (size_t i = 0; i<N; ++i) {
                 bucket& b = buckets_[i];
                 writer_lock b_lock(b.mutex_);
 
-                std::function<void(pair&)> consumer_wrapper = [_consumer](pair& _pair) {
-                    _consumer(_pair.get_key(), *_pair.get_value());
+                std::function<void(pair&)> consumer_wrapper = [consumer = std::forward<Consumer>(_consumer)](
+                        pair& _pair) {
+                    consumer(_pair.get_key(), *_pair.get_value());
                 };
                 b.list_.write_each(consumer_wrapper);
             }
@@ -418,18 +419,18 @@ namespace mkr {
 
         /**
          * Perform the consumer operation on each value in the hashtable.
-         * @tparam ConsumerOutput The return type of the consumer function.
          * @param _consumer Consumer to operate on the values.
          */
-        template<class ConsumerOutput>
-        void read_each(std::function<ConsumerOutput(const K&, const V&)> _consumer) const
+        template<class Consumer>
+        void read_each(Consumer&& _consumer) const requires mkr::is_consumer<Consumer, const K&, const V&>
         {
             for (size_t i = 0; i<N; ++i) {
                 const bucket& b = buckets_[i];
                 reader_lock b_lock(b.mutex_);
 
-                std::function<void(const pair&)> consumer_wrapper = [_consumer](const pair& _pair) {
-                    _consumer(_pair.get_key(), *_pair.get_value());
+                std::function<void(const pair&)> consumer_wrapper = [consumer = std::forward<Consumer>(_consumer)](
+                        const pair& _pair) {
+                    consumer(_pair.get_key(), *_pair.get_value());
                 };
                 b.list_.read_each(consumer_wrapper);
             }

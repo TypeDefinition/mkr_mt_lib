@@ -242,9 +242,10 @@ namespace mkr {
          * * @param _limit The maximum number of values to replace.
          * @return The number of values replaced.
          */
-        template<class Predicate>
-        size_t replace_if(Predicate&& _predicate, std::function<T(void)> _supplier,
+        template<class Predicate, class Supplier>
+        size_t replace_if(Predicate&& _predicate, Supplier&& _supplier,
                 size_t _limit = SIZE_MAX) requires mkr::is_predicate<Predicate, const T&>
+                && mkr::is_supplier<Supplier, T>
         {
             size_t num_replaced = 0;
             // Get current (head) node.
@@ -259,7 +260,7 @@ namespace mkr {
 
                 // If the predicate passes, replace the value.
                 if (std::invoke(std::forward<Predicate>(_predicate), *current->next_->value_)) {
-                    current->next_->value_ = std::make_shared<T>(_supplier());
+                    current->next_->value_ = std::make_shared<T>(std::invoke(std::forward<Supplier>(_supplier)));
                     // Increase the replace counter.
                     num_replaced++;
                     // Decrease limit counter.
@@ -277,11 +278,10 @@ namespace mkr {
 
         /**
          * Perform the consumer operation on each value in the list.
-         * @tparam ConsumerOutput The return type of the consumer function.
          * @param _consumer Consumer to operate on the values.
          */
-        template<class ConsumerOutput>
-        void write_each(std::function<ConsumerOutput(T&)> _consumer)
+        template<class Consumer>
+        void write_each(Consumer&& _consumer) requires mkr::is_consumer<Consumer, T&>
         {
             // Get current (head) node.
             node* current = &head_;
@@ -294,7 +294,7 @@ namespace mkr {
                 writer_lock next_lock(current->next_->mutex_);
 
                 // Let the consumer operate on the value.
-                std::invoke(_consumer, *current->next_->value_);
+                std::invoke(std::forward<Consumer>(_consumer), *current->next_->value_);
 
                 // Advance current node.
                 current = current->next_.get();
@@ -308,8 +308,8 @@ namespace mkr {
          * @tparam ConsumerOutput The return type of the consumer function.
          * @param _consumer Consumer to operate on the values.
          */
-        template<class ConsumerOutput>
-        void read_each(std::function<ConsumerOutput(const T&)> _consumer) const
+        template<class Consumer>
+        void read_each(Consumer&& _consumer) const requires mkr::is_consumer<Consumer, const T&>
         {
             // Get current (head) node.
             const node* current = &head_;
@@ -322,7 +322,7 @@ namespace mkr {
                 reader_lock next_lock(current->next_->mutex_);
 
                 // Let the consumer operate on the value.
-                std::invoke(_consumer, *current->next_->value_);
+                std::invoke(std::forward<Consumer>(_consumer), *current->next_->value_);
 
                 // Advance current node.
                 current = current->next_.get();
