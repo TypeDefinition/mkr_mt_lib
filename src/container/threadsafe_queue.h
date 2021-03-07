@@ -6,12 +6,12 @@
 #define MKR_MULTITHREAD_LIBRARY_THREADSAFE_QUEUE_H
 
 #include "container.h"
+#include "../util/concepts.h"
 
 #include <memory>
 #include <mutex>
 #include <atomic>
 #include <condition_variable>
-#include <concepts>
 
 namespace mkr {
     /**

@@ -6,14 +6,13 @@
 #define MKR_MULTITHREAD_LIBRARY_THREADSAFE_LIST_H
 
 #include "container.h"
+#include "../util/concepts.h"
 
 #include <memory>
 #include <shared_mutex>
 #include <atomic>
-#include <functional>
 #include <optional>
 #include <type_traits>
-#include <concepts>
 
 namespace mkr {
     /**
@@ -134,7 +133,7 @@ namespace mkr {
          * @return Returns true if any of the values in the list passes the predicate. Else, returns false.
          */
         template<class Predicate>
-        bool match_any(Predicate&& _predicate) const requires std::predicate<Predicate, const T&>
+        bool match_any(Predicate&& _predicate) const requires mkr::is_predicate<Predicate, const T&>
         {
             // Get current (head) node.
             const node* current = &head_;
@@ -164,7 +163,7 @@ namespace mkr {
          * @return Returns false if any of the values in the list passes the predicate. Else, returns true.
          */
         template<class Predicate>
-        bool match_none(Predicate&& _predicate) const requires std::predicate<Predicate, const T&>
+        bool match_none(Predicate&& _predicate) const requires mkr::is_predicate<Predicate, const T&>
         {
             return !match_any(std::forward<Predicate>(_predicate));
         }
@@ -196,7 +195,8 @@ namespace mkr {
          * @return The number of values removed.
          */
         template<class Predicate>
-        size_t remove_if(Predicate&& _predicate, size_t _limit = SIZE_MAX) requires std::predicate<Predicate, const T&>
+        size_t
+        remove_if(Predicate&& _predicate, size_t _limit = SIZE_MAX) requires mkr::is_predicate<Predicate, const T&>
         {
             // Remove counter.
             size_t num_removed = 0;
@@ -244,7 +244,7 @@ namespace mkr {
          */
         template<class Predicate>
         size_t replace_if(Predicate&& _predicate, std::function<T(void)> _supplier,
-                size_t _limit = SIZE_MAX) requires std::predicate<Predicate, const T&>
+                size_t _limit = SIZE_MAX) requires mkr::is_predicate<Predicate, const T&>
         {
             size_t num_replaced = 0;
             // Get current (head) node.
@@ -337,7 +337,7 @@ namespace mkr {
          * @return The first value that passes the predicate. If none passes, nullptr is returned.
          */
         template<class Predicate>
-        std::shared_ptr<T> find_first_if(Predicate&& _predicate) requires std::predicate<Predicate, const T&>
+        std::shared_ptr<T> find_first_if(Predicate&& _predicate) requires mkr::is_predicate<Predicate, const T&>
         {
             // Get current (head) node.
             node* current = &head_;
@@ -370,7 +370,7 @@ namespace mkr {
          */
         template<class Predicate>
         std::shared_ptr<const T>
-        find_first_if(Predicate&& _predicate) const requires std::predicate<Predicate, const T&>
+        find_first_if(Predicate&& _predicate) const requires mkr::is_predicate<Predicate, const T&>
         {
             // Get current (head) node.
             const node* current = &head_;
@@ -404,7 +404,7 @@ namespace mkr {
          */
         template<typename MapperOutput, typename Predicate>
         std::optional<MapperOutput> write_and_map_first_if(Predicate&& _predicate,
-                std::function<MapperOutput(T&)> _mapper) requires std::predicate<Predicate, const T&>
+                std::function<MapperOutput(T&)> _mapper) requires mkr::is_predicate<Predicate, const T&>
         {
             // Get current (head) node.
             node* current = &head_;
@@ -439,7 +439,7 @@ namespace mkr {
          */
         template<class MapperOutput, class Predicate>
         std::optional<MapperOutput> read_and_map_first_if(Predicate&& _predicate,
-                std::function<MapperOutput(const T&)> _mapper) const requires std::predicate<Predicate, const T&>
+                std::function<MapperOutput(const T&)> _mapper) const requires mkr::is_predicate<Predicate, const T&>
         {
             // Get current (head) node.
             const node* current = &head_;
@@ -475,7 +475,7 @@ namespace mkr {
          */
         template<typename MapperOutput, typename InserterInput, typename InserterOutput, typename Predicate>
         void write_and_map_if(Predicate&& _predicate, std::function<MapperOutput(T&)> _mapper,
-                std::function<InserterOutput(InserterInput)> _inserter) requires std::predicate<Predicate, const T&>
+                std::function<InserterOutput(InserterInput)> _inserter) requires mkr::is_predicate<Predicate, const T&>
         {
             write_each([&](T& _value) {
                 if (std::invoke(std::forward<Predicate>(_predicate), _value)) {
@@ -494,7 +494,7 @@ namespace mkr {
          */
         template<typename MapperOutput, typename InserterInput, typename InserterOutput, typename Predicate>
         void read_and_map_if(Predicate&& _predicate, std::function<MapperOutput(const T&)> _mapper,
-                std::function<InserterOutput(InserterInput)> _inserter) requires std::predicate<Predicate, const T&>
+                std::function<InserterOutput(InserterInput)> _inserter) requires mkr::is_predicate<Predicate, const T&>
         {
             read_each([&](const T& _value) {
                 if (std::invoke(std::forward<Predicate>(_predicate), _value)) {
