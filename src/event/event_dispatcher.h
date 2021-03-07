@@ -87,7 +87,7 @@ namespace mkr {
             std::shared_ptr<listener_list> lp = listeners_.get(CATEGORY_ID(event, Event));
             if (!lp) { return; }
 
-            lp->write_each<void>([_event](event_listener* _listener) -> void {
+            lp->write_each([_event](event_listener* _listener) -> void {
                 _listener->invoke_callback(_event);
             });
         }

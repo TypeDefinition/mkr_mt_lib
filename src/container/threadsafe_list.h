@@ -244,8 +244,8 @@ namespace mkr {
          */
         template<class Predicate, class Supplier>
         size_t replace_if(Predicate&& _predicate, Supplier&& _supplier,
-                size_t _limit = SIZE_MAX) requires mkr::is_predicate<Predicate, const T&>
-                && mkr::is_supplier<Supplier, T>
+                size_t _limit = SIZE_MAX) requires (mkr::is_predicate<Predicate, const T&>
+                && mkr::is_supplier<Supplier, T>)
         {
             size_t num_replaced = 0;
             // Get current (head) node.
@@ -402,9 +402,10 @@ namespace mkr {
          * @param _predicate Predicate to test the values.
          * @param _mapper Mapper to operate on the first value to pass the predicate.
          */
-        template<typename MapperOutput, typename Predicate>
-        std::optional<MapperOutput> write_and_map_first_if(Predicate&& _predicate,
-                std::function<MapperOutput(T&)> _mapper) requires mkr::is_predicate<Predicate, const T&>
+        template<typename Predicate, typename Mapper>
+        std::optional<std::invoke_result_t<Mapper, T&>>
+        write_and_map_first_if(Predicate&& _predicate, Mapper&& _mapper)requires (mkr::is_predicate<Predicate, const T&>
+                && mkr::is_function<Mapper, T&>)
         {
             // Get current (head) node.
             node* current = &head_;
@@ -418,7 +419,8 @@ namespace mkr {
 
                 // If the predicate passes, return the result of applying the mapper on the value wrapped in an optional.
                 if (std::invoke(std::forward<Predicate>(_predicate), *current->next_->value_)) {
-                    return std::optional<MapperOutput>{std::invoke(_mapper, *current->next_->value_)};
+                    return std::optional<std::invoke_result_t<Mapper, T&>>{
+                            std::invoke(std::forward<Mapper>(_mapper), *current->next_->value_)};
                 }
 
                 // Advance current node.
@@ -437,9 +439,10 @@ namespace mkr {
          * @param _predicate Predicate to test the values.
          * @param _mapper Mapper to operate on the first value to pass the predicate.
          */
-        template<class MapperOutput, class Predicate>
-        std::optional<MapperOutput> read_and_map_first_if(Predicate&& _predicate,
-                std::function<MapperOutput(const T&)> _mapper) const requires mkr::is_predicate<Predicate, const T&>
+        template<class Predicate, class Mapper>
+        std::optional<std::invoke_result_t<Mapper, const T&>>
+        read_and_map_first_if(Predicate&& _predicate, Mapper&& _mapper) const requires (
+                mkr::is_predicate<Predicate, const T&> && mkr::is_function<Mapper, const T&>)
         {
             // Get current (head) node.
             const node* current = &head_;
@@ -452,7 +455,8 @@ namespace mkr {
                 reader_lock next_lock(current->next_->mutex_);
 
                 if (std::invoke(std::forward<Predicate>(_predicate), *current->next_->value_)) {
-                    return std::optional<MapperOutput>{std::invoke(_mapper, *current->next_->value_)};
+                    return std::optional<std::invoke_result_t<Mapper, const T&>>{
+                            std::invoke(std::forward<Mapper>(_mapper), *current->next_->value_)};
                 }
 
                 // Advance current node.
@@ -473,13 +477,14 @@ namespace mkr {
          * @param _mapper The mapper function.
          * @param _inserter The function to insert the mapper's return value to a collection.
          */
-        template<typename MapperOutput, typename InserterInput, typename InserterOutput, typename Predicate>
-        void write_and_map_if(Predicate&& _predicate, std::function<MapperOutput(T&)> _mapper,
-                std::function<InserterOutput(InserterInput)> _inserter) requires mkr::is_predicate<Predicate, const T&>
+        template<typename Predicate, typename Mapper, typename Inserter>
+        void write_and_map_if(Predicate&& _predicate, Mapper&& _mapper, Inserter&& _inserter)requires (
+                mkr::is_predicate<Predicate, const T&> && mkr::is_function<Mapper, T&>
+                        && mkr::is_consumer<Inserter, std::invoke_result_t<Mapper, T&>>)
         {
             write_each([&](T& _value) {
                 if (std::invoke(std::forward<Predicate>(_predicate), _value)) {
-                    std::invoke(_inserter, std::invoke(_mapper, _value));
+                    std::invoke(std::forward<Inserter>(_inserter), std::invoke(std::forward<Mapper>(_mapper), _value));
                 }
             });
         }
@@ -492,48 +497,43 @@ namespace mkr {
          * @param _mapper The mapper function.
          * @param _inserter The function to insert the mapper's return value to a collection.
          */
-        template<typename MapperOutput, typename InserterInput, typename InserterOutput, typename Predicate>
-        void read_and_map_if(Predicate&& _predicate, std::function<MapperOutput(const T&)> _mapper,
-                std::function<InserterOutput(InserterInput)> _inserter) requires mkr::is_predicate<Predicate, const T&>
+        template<typename Predicate, typename Mapper, typename Inserter>
+        void read_and_map_if(Predicate&& _predicate, Mapper&& _mapper, Inserter&& _inserter)requires (
+                mkr::is_predicate<Predicate, const T&> && mkr::is_function<Mapper, const T&>
+                        && mkr::is_consumer<Inserter, std::invoke_result_t<Mapper, const T&>>)
         {
             read_each([&](const T& _value) {
                 if (std::invoke(std::forward<Predicate>(_predicate), _value)) {
-                    std::invoke(_inserter, std::invoke(_mapper, _value));
+                    std::invoke(std::forward<Inserter>(_inserter), std::invoke(std::forward<Mapper>(_mapper), _value));
                 }
             });
         }
 
         /**
          * For every value, insert the result of applying the mapper on it to another collection.
-         * @tparam MapperOutput The return type of the mapper.
-         * @tparam InserterInput The input type of the inserter function.
-         * @tparam InserterOutput The return type of the inserter function.
          * @param _mapper The mapper function.
          * @param _inserter The function to insert the mapper's return value to a collection.
          */
-        template<typename MapperOutput, typename InserterInput, typename InserterOutput>
-        void write_and_map_each(std::function<MapperOutput(T&)> _mapper,
-                std::function<InserterOutput(InserterInput)> _inserter)
+        template<typename Mapper, typename Inserter>
+        void write_and_map_each(Mapper&& _mapper, Inserter&& _inserter)requires (mkr::is_function<Mapper, T&>
+                && mkr::is_consumer<Inserter, std::invoke_result_t<Mapper, T&>>)
         {
             write_each([&](T& _value) {
-                std::invoke(_inserter, std::invoke(_mapper, _value));
+                std::invoke(std::forward<Inserter>(_inserter), std::invoke(std::forward<Mapper>(_mapper), _value));
             });
         }
 
         /**
          * For every value, insert the result of applying the mapper on it to another collection.
-         * @tparam MapperOutput The return type of the mapper.
-         * @tparam InserterInput The input type of the inserter function.
-         * @tparam InserterOutput The return type of the inserter function.
          * @param _mapper The mapper function.
          * @param _inserter The function to insert the mapper's return value to a collection.
          */
-        template<typename MapperOutput, typename InserterInput, typename InserterOutput>
-        void read_and_map_each(std::function<MapperOutput(const T&)> _mapper,
-                std::function<InserterOutput(InserterInput)> _inserter)
+        template<typename Mapper, typename Inserter>
+        void read_and_map_each(Mapper&& _mapper, Inserter&& _inserter)requires (mkr::is_function<Mapper, const T&>
+                && mkr::is_consumer<Inserter, std::invoke_result_t<Mapper, T&>>)
         {
             read_each([&](const T& _value) {
-                std::invoke(_inserter, std::invoke(_mapper, _value));
+                std::invoke(std::forward<Inserter>(_inserter), std::invoke(std::forward<Mapper>(_mapper), _value));
             });
         }
 

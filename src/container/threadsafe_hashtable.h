@@ -371,14 +371,16 @@ namespace mkr {
          * @param _mapper The mapper function to perform on the key-value pair.
          * @return The result of the mapper function.
          */
-        template<typename MapperOutput>
-        std::optional<MapperOutput> write_and_map(const K& _key, std::function<MapperOutput(V&)> _mapper)
+        template<typename Mapper>
+        std::optional<std::invoke_result_t<Mapper, V&>>
+        write_and_map(const K& _key, Mapper&& _mapper) requires mkr::is_function<Mapper, V&>
         {
             bucket& b = get_bucket(_key);
             writer_lock b_lock(b.mutex_);
 
             std::shared_ptr<pair> p = b.list_.find_first_if(match_key{_key});
-            return p ? std::optional<MapperOutput>{std::invoke(_mapper, *p->get_value())} : std::nullopt;
+            return p ? std::optional<std::invoke_result_t<Mapper, V&>>{
+                    std::invoke(std::forward<Mapper>(_mapper), *p->get_value())} : std::nullopt;
         }
 
         /**
@@ -388,14 +390,16 @@ namespace mkr {
          * @param _mapper The mapper function to perform on the key-value pair.
          * @return The result of the mapper function.
          */
-        template<typename MapperOutput>
-        std::optional<MapperOutput> read_and_map(const K& _key, std::function<MapperOutput(const V&)> _mapper) const
+        template<typename Mapper>
+        std::optional<std::invoke_result_t<Mapper, const V&>>
+        read_and_map(const K& _key, Mapper&& _mapper) const requires mkr::is_function<Mapper, const V&>
         {
             const bucket& b = get_bucket(_key);
             reader_lock b_lock(b.mutex_);
 
             std::shared_ptr<const pair> p = b.list_.find_first_if(match_key{_key});
-            return p ? std::optional<MapperOutput>{std::invoke(_mapper, *p->get_value())} : std::nullopt;
+            return p ? std::optional<std::invoke_result_t<Mapper, const V&>>{
+                    std::invoke(std::forward<Mapper>(_mapper), *p->get_value())} : std::nullopt;
         }
 
         /**
@@ -411,7 +415,7 @@ namespace mkr {
 
                 std::function<void(pair&)> consumer_wrapper = [consumer = std::forward<Consumer>(_consumer)](
                         pair& _pair) {
-                    consumer(_pair.get_key(), *_pair.get_value());
+                    std::invoke(consumer, _pair.get_key(), *_pair.get_value());
                 };
                 b.list_.write_each(consumer_wrapper);
             }
@@ -430,7 +434,7 @@ namespace mkr {
 
                 std::function<void(const pair&)> consumer_wrapper = [consumer = std::forward<Consumer>(_consumer)](
                         const pair& _pair) {
-                    consumer(_pair.get_key(), *_pair.get_value());
+                    std::invoke(consumer, _pair.get_key(), *_pair.get_value());
                 };
                 b.list_.read_each(consumer_wrapper);
             }
