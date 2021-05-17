@@ -125,6 +125,10 @@ namespace mkr {
             return old_head->value_;
         }
 
+        /**
+         * Constructs a copy of another threadsafe_queue. The contents of the other threadsafe_queue is copied.
+         * @param _threadsafe_queue The threadsafe_queue to copy.
+         */
         void do_copy_construct(const threadsafe_queue* _threadsafe_queue) requires std::copyable<T>
         {
             // Lock the mutexes to prevent anyone from pushing.

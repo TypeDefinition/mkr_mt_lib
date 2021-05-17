@@ -16,7 +16,7 @@ namespace mkr {
     /**
      * Threadsafe exclusive read, concurrent write guard.
      *
-     * Addtional Requirements:
+     * Additional Requirements:
      * - rw_guard must be able to support type T where T is a non-copyable or non-movable type.
      * - rw_guard does not have to support a non-copyable AND non-movable type.
      *
@@ -29,6 +29,11 @@ namespace mkr {
         typedef std::unique_lock<mutex_type> writer_lock;
         typedef std::shared_lock<mutex_type> reader_lock;
 
+        /**
+         * Constructs this rw_guard as a copy of another rw_guard.
+         * The value of the other rw_guard is copied.
+         * @param _rw_guard The rw_guard to copy.
+         */
         void do_copy(const rw_guard* _rw_guard) requires std::is_copy_constructible_v<T>
         {
             reader_lock lock(_rw_guard->value_mutex_);

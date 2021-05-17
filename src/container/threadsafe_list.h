@@ -81,7 +81,8 @@ namespace mkr {
          * Internal copy constructor helper function.
          * @param _threadsafe_list The threadsafe_list to copy.
          */
-        void do_copy_constructor(const threadsafe_list* _threadsafe_list) requires std::copyable<T>
+        void do_copy_constructor(const threadsafe_list* _threadsafe_list)
+            requires std::copyable<T>
         {
             std::function<void(const T&)> copy_func = [this](const T& _value) {
                 this->push_front(_value);
@@ -129,11 +130,13 @@ namespace mkr {
 
         /**
          * Checks if any of the values in the list passes the predicate.
+         * @tparam Predicate The typename of the predicate.
          * @param _predicate Predicate to test the values.
          * @return Returns true if any of the values in the list passes the predicate. Else, returns false.
          */
         template<class Predicate>
-        bool match_any(Predicate&& _predicate) const requires mkr::is_predicate<Predicate, const T&>
+        bool match_any(Predicate&& _predicate) const
+            requires mkr::is_predicate<Predicate, const T&>
         {
             // Get current (head) node.
             const node* current = &head_;
@@ -159,11 +162,13 @@ namespace mkr {
 
         /**
          * Checks if none of the values in the list passes the predicate.
+         * @tparam Predicate The typename of the predicate.
          * @param _predicate Predicate to test the values.
          * @return Returns false if any of the values in the list passes the predicate. Else, returns true.
          */
         template<class Predicate>
-        bool match_none(Predicate&& _predicate) const requires mkr::is_predicate<Predicate, const T&>
+        bool match_none(Predicate&& _predicate) const
+            requires mkr::is_predicate<Predicate, const T&>
         {
             return !match_any(std::forward<Predicate>(_predicate));
         }
@@ -189,14 +194,15 @@ namespace mkr {
         }
 
         /**
-         * Remove all values in the list that passes the predicate.
+         * Remove values in the list that passes the predicate.
+         * @tparam Predicate The typename of the predicate.
          * @param _predicate Predicate to test if a value should be removed.
          * @param _limit The maximum number of values to remove.
          * @return The number of values removed.
          */
         template<class Predicate>
-        size_t
-        remove_if(Predicate&& _predicate, size_t _limit = SIZE_MAX) requires mkr::is_predicate<Predicate, const T&>
+        size_t remove_if(Predicate&& _predicate, size_t _limit = SIZE_MAX)
+            requires mkr::is_predicate<Predicate, const T&>
         {
             // Remove counter.
             size_t num_removed = 0;
@@ -237,15 +243,16 @@ namespace mkr {
 
         /**
          * Replace the value if it passes the predicate.
+         * @tparam Predicate The typename of the predicate.
+         * @tparam Supplier The typename of the supplier.
          * @param _predicate Predicate to test if a value should be replaced.
          * @param _supplier Supplier to generate the replacement value.
-         * * @param _limit The maximum number of values to replace.
+         * @param _limit The maximum number of values to replace.
          * @return The number of values replaced.
          */
         template<class Predicate, class Supplier>
-        size_t replace_if(Predicate&& _predicate, Supplier&& _supplier,
-                size_t _limit = SIZE_MAX) requires (mkr::is_predicate<Predicate, const T&>
-                && mkr::is_supplier<Supplier, T>)
+        size_t replace_if(Predicate&& _predicate, Supplier&& _supplier, size_t _limit = SIZE_MAX)
+            requires (mkr::is_predicate<Predicate, const T&> && mkr::is_supplier<Supplier, T>)
         {
             size_t num_replaced = 0;
             // Get current (head) node.
@@ -278,10 +285,13 @@ namespace mkr {
 
         /**
          * Perform the consumer operation on each value in the list.
+         * write_each allows modifying the value in the threadsafe_list.
+         * @tparam Consumer The typename of the consumer.
          * @param _consumer Consumer to operate on the values.
          */
         template<class Consumer>
-        void write_each(Consumer&& _consumer) requires mkr::is_consumer<Consumer, T&>
+        void write_each(Consumer&& _consumer)
+            requires mkr::is_consumer<Consumer, T&>
         {
             // Get current (head) node.
             node* current = &head_;
@@ -305,11 +315,13 @@ namespace mkr {
 
         /**
          * Perform the consumer operation on each value in the list.
-         * @tparam ConsumerOutput The return type of the consumer function.
+         * read_each does not allow modifying the value in the threadsafe_list.
+         * @tparam Consumer The typename of the consumer.
          * @param _consumer Consumer to operate on the values.
          */
         template<class Consumer>
-        void read_each(Consumer&& _consumer) const requires mkr::is_consumer<Consumer, const T&>
+        void read_each(Consumer&& _consumer) const
+            requires mkr::is_consumer<Consumer, const T&>
         {
             // Get current (head) node.
             const node* current = &head_;
@@ -337,7 +349,8 @@ namespace mkr {
          * @return The first value that passes the predicate. If none passes, nullptr is returned.
          */
         template<class Predicate>
-        std::shared_ptr<T> find_first_if(Predicate&& _predicate) requires mkr::is_predicate<Predicate, const T&>
+        std::shared_ptr<T> find_first_if(Predicate&& _predicate)
+            requires mkr::is_predicate<Predicate, const T&>
         {
             // Get current (head) node.
             node* current = &head_;
@@ -365,12 +378,13 @@ namespace mkr {
 
         /**
          * Find and return the first value that passes the predicate.
+         * @tparam Predicate The typename of the predicate.
          * @param _predicate The predicate to test the value with.
          * @return The first value that passes the predicate. If none passes, nullptr is returned.
          */
         template<class Predicate>
-        std::shared_ptr<const T>
-        find_first_if(Predicate&& _predicate) const requires mkr::is_predicate<Predicate, const T&>
+        std::shared_ptr<const T> find_first_if(Predicate&& _predicate) const
+            requires mkr::is_predicate<Predicate, const T&>
         {
             // Get current (head) node.
             const node* current = &head_;
@@ -398,14 +412,17 @@ namespace mkr {
 
         /**
          * Perform the mapper operation on the first value in the list that passes the predicate.
-         * @tparam MapperOutput The return type of the mapper function.
+         * write_and_map_first_if allows modifying the values in the threadsafe_list.
+         * @tparam Predicate The typename of the predicate.
+         * @tparam Mapper The typename of the mapper function.
          * @param _predicate Predicate to test the values.
          * @param _mapper Mapper to operate on the first value to pass the predicate.
+         * @return A std::optional containing the return value of the mapper function if a value passing the predicate was found.
+         * Else, returns a std::nullopt.
          */
         template<typename Predicate, typename Mapper>
-        std::optional<std::invoke_result_t<Mapper, T&>>
-        write_and_map_first_if(Predicate&& _predicate, Mapper&& _mapper)requires (mkr::is_predicate<Predicate, const T&>
-                && mkr::is_function<Mapper, T&>)
+        std::optional<std::invoke_result_t<Mapper, T&>> write_and_map_first_if(Predicate&& _predicate, Mapper&& _mapper)
+            requires (mkr::is_predicate<Predicate, const T&> && mkr::is_function<Mapper, T&>)
         {
             // Get current (head) node.
             node* current = &head_;
@@ -435,14 +452,16 @@ namespace mkr {
 
         /**
          * Perform the mapper operation on the first value in the list that passes the predicate.
-         * @tparam MapperOutput The return type of the mapper function.
+         * read_and_map_first_if does not allow modifying the values in the threadsafe_list
+         * @tparam Predicate The typename of the predicate.
+         * @tparam Mapper The typename of the Mapper.
          * @param _predicate Predicate to test the values.
          * @param _mapper Mapper to operate on the first value to pass the predicate.
+         * @return The return value of mapper if a value passes the predicate. Else, returns a std::nullopt.
          */
         template<class Predicate, class Mapper>
-        std::optional<std::invoke_result_t<Mapper, const T&>>
-        read_and_map_first_if(Predicate&& _predicate, Mapper&& _mapper) const requires (
-                mkr::is_predicate<Predicate, const T&> && mkr::is_function<Mapper, const T&>)
+        std::optional<std::invoke_result_t<Mapper, const T&>> read_and_map_first_if(Predicate&& _predicate, Mapper&& _mapper) const
+            requires (mkr::is_predicate<Predicate, const T&> && mkr::is_function<Mapper, const T&>)
         {
             // Get current (head) node.
             const node* current = &head_;
@@ -471,16 +490,19 @@ namespace mkr {
 
         /**
          * For every value that passes the predicate, insert the result of applying the mapper on it to another collection.
-         * @tparam MapperOutput The return type of the mapper.
-         * @tparam InserterInput The input type of the inserter function.
-         * @tparam InserterOutput The return type of the inserter function.
+         * write_and_map_if allows modifying the values in the threadsafe_list.
+         * @tparam Predicate The typename of the predicate.
+         * @tparam Mapper The typename of the mapper.
+         * @tparam Inserter The typename of the inserter.
+         * @param _predicate The predicate to test the values.
          * @param _mapper The mapper function.
          * @param _inserter The function to insert the mapper's return value to a collection.
          */
         template<typename Predicate, typename Mapper, typename Inserter>
-        void write_and_map_if(Predicate&& _predicate, Mapper&& _mapper, Inserter&& _inserter)requires (
-                mkr::is_predicate<Predicate, const T&> && mkr::is_function<Mapper, T&>
-                        && mkr::is_consumer<Inserter, std::invoke_result_t<Mapper, T&>>)
+        void write_and_map_if(Predicate&& _predicate, Mapper&& _mapper, Inserter&& _inserter)
+            requires mkr::is_predicate<Predicate, const T&>
+                    && mkr::is_function<Mapper, T&>
+                    && mkr::is_consumer<Inserter, std::invoke_result_t<Mapper, T&>>
         {
             write_each([&](T& _value) {
                 if (std::invoke(std::forward<Predicate>(_predicate), _value)) {
@@ -491,16 +513,19 @@ namespace mkr {
 
         /**
          * For every value that passes the predicate, insert the result of applying the mapper on it to another collection.
-         * @tparam MapperOutput The return type of the mapper.
-         * @tparam InserterInput The input type of the inserter function.
-         * @tparam InserterOutput The return type of the inserter function.
+         * read_and_map_if does not allow modifying the values in the threadsafe_list
+         * @tparam Predicate The typename of the predicate.
+         * @tparam Mapper The typename of the mapper.
+         * @tparam Inserter The typename of the inserter.
+         * @param _predicate The predicate to test the values.
          * @param _mapper The mapper function.
          * @param _inserter The function to insert the mapper's return value to a collection.
          */
         template<typename Predicate, typename Mapper, typename Inserter>
-        void read_and_map_if(Predicate&& _predicate, Mapper&& _mapper, Inserter&& _inserter)requires (
-                mkr::is_predicate<Predicate, const T&> && mkr::is_function<Mapper, const T&>
-                        && mkr::is_consumer<Inserter, std::invoke_result_t<Mapper, const T&>>)
+        void read_and_map_if(Predicate&& _predicate, Mapper&& _mapper, Inserter&& _inserter)
+            requires mkr::is_predicate<Predicate, const T&>
+                    && mkr::is_function<Mapper, const T&>
+                    && mkr::is_consumer<Inserter, std::invoke_result_t<Mapper, const T&>>
         {
             read_each([&](const T& _value) {
                 if (std::invoke(std::forward<Predicate>(_predicate), _value)) {
@@ -511,12 +536,15 @@ namespace mkr {
 
         /**
          * For every value, insert the result of applying the mapper on it to another collection.
+         * write_and_map_each allows modifying the values in the threadsafe_list.
+         * @tparam Mapper The typename of the mapper.
+         * @tparam Inserter The typename of the inserter.
          * @param _mapper The mapper function.
          * @param _inserter The function to insert the mapper's return value to a collection.
          */
         template<typename Mapper, typename Inserter>
-        void write_and_map_each(Mapper&& _mapper, Inserter&& _inserter)requires (mkr::is_function<Mapper, T&>
-                && mkr::is_consumer<Inserter, std::invoke_result_t<Mapper, T&>>)
+        void write_and_map_each(Mapper&& _mapper, Inserter&& _inserter)
+            requires mkr::is_function<Mapper, T&> && mkr::is_consumer<Inserter, std::invoke_result_t<Mapper, T&>>
         {
             write_each([&](T& _value) {
                 std::invoke(std::forward<Inserter>(_inserter), std::invoke(std::forward<Mapper>(_mapper), _value));
@@ -525,12 +553,15 @@ namespace mkr {
 
         /**
          * For every value, insert the result of applying the mapper on it to another collection.
+         * read_and_map_each does not allow modifying the values in the threadsafe_list
+         * @tparam Mapper The typename of the mapper.
+         * @tparam Inserter The typename of the inserter.
          * @param _mapper The mapper function.
          * @param _inserter The function to insert the mapper's return value to a collection.
          */
         template<typename Mapper, typename Inserter>
-        void read_and_map_each(Mapper&& _mapper, Inserter&& _inserter)requires (mkr::is_function<Mapper, const T&>
-                && mkr::is_consumer<Inserter, std::invoke_result_t<Mapper, T&>>)
+        void read_and_map_each(Mapper&& _mapper, Inserter&& _inserter)
+            requires mkr::is_function<Mapper, const T&> && mkr::is_consumer<Inserter, std::invoke_result_t<Mapper, T&>>
         {
             read_each([&](const T& _value) {
                 std::invoke(std::forward<Inserter>(_inserter), std::invoke(std::forward<Mapper>(_mapper), _value));

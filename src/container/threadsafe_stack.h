@@ -94,7 +94,12 @@ namespace mkr {
             return head_data;
         }
 
-        void do_copy_construct(const threadsafe_stack* _threadsafe_stack) requires std::copyable<T>
+        /**
+         * Constructs a copy of another threadsafe_stack. The contents of the other threadsafe_stack is copied.
+         * @param _threadsafe_queue The threadsafe_stack to copy.
+         */
+        void do_copy_construct(const threadsafe_stack* _threadsafe_stack)
+            requires std::copyable<T>
         {
             // Lock the top mutex.
             std::lock_guard<mutex_type> lock(_threadsafe_stack->top_mutex_);

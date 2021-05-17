@@ -177,7 +177,12 @@ namespace mkr {
             return true;
         }
 
-        void do_copy_construct(const threadsafe_hashtable* _threadsafe_hashtable) requires std::copyable<V>
+        /**
+         * Constructs a copy of another threadsafe_hashtable. The contents of the other threadsafe_hashtable is copied.
+         * @param _threadsafe_hashtable The threadsafe_hashtable to copy.
+         */
+        void do_copy_construct(const threadsafe_hashtable* _threadsafe_hashtable)
+            requires std::copyable<V>
         {
             std::function<void(const K&, const V&)> copy_func =
                     [this](const K& _key, const V& _value) {
@@ -186,9 +191,9 @@ namespace mkr {
             _threadsafe_hashtable->read_each(copy_func);
         }
 
-        // Buckets
+        /// Buckets
         bucket buckets_[N];
-        // Number of elements in the container.
+        /// Number of elements in the container.
         std::atomic_size_t num_elements_;
 
     public:
@@ -336,14 +341,16 @@ namespace mkr {
             return p ? p->get_value() : nullptr;
         }
 
-        /**
-         * Returns the value that belongs to the key if it exists. Else, insert a new value and return that.
-         * @param _key The key that the value belongs to.
-         * @param _supplier A supplier to construct a new value if there is no existing one.
-         * @return The value that belongs to the key if it exists. Else, insert a new value and return that.
-         */
+         /**
+          * Returns the value that belongs to the key if it exists. Else, insert a new value and return that.
+          * @tparam Supplier The typename of the supplier function.
+          * @param _key The key that the value belongs to.
+          * @param _supplier A supplier to construct a new value if there is no existing one.
+          * @return The value that belongs to the key if it exists. Else, insert a new value and return that.
+          */
         template<class Supplier>
-        std::shared_ptr<V> get_or_insert(const K& _key, Supplier&& _supplier) requires mkr::is_supplier<Supplier, V>
+        std::shared_ptr<V> get_or_insert(const K& _key, Supplier&& _supplier)
+            requires mkr::is_supplier<Supplier, V>
         {
             // Check if there is already an existing value.
             std::shared_ptr<V> existing_value = get(_key);
@@ -364,16 +371,17 @@ namespace mkr {
             return new_value;
         }
 
-        /**
-         * Perform the mapper operation on a key-value pair.
-         * @tparam MapperOutput The return type of the mapper function.
-         * @param _key The key of the pair to perform the mapper function on.
-         * @param _mapper The mapper function to perform on the key-value pair.
-         * @return The result of the mapper function.
-         */
+         /**
+          * Perform a mapping operation on a value specified by a key. If the key does not exists, a std::nullopt is returned.
+          * write_and_map allows modifying of the value in the threadsafe_hashtable.
+          * @tparam Mapper The type of mapper function. Takes in the value as a parameter.
+          * @param _key The key of the value.
+          * @param _mapper The mapper function.
+          * @return An std::optional containing the return value of the mapper function if the key exists. Else, returns a std::nullopt.
+          */
         template<typename Mapper>
-        std::optional<std::invoke_result_t<Mapper, V&>>
-        write_and_map(const K& _key, Mapper&& _mapper) requires mkr::is_function<Mapper, V&>
+        std::optional<std::invoke_result_t<Mapper, V&>> write_and_map(const K& _key, Mapper&& _mapper)
+            requires mkr::is_function<Mapper, V&>
         {
             bucket& b = get_bucket(_key);
             writer_lock b_lock(b.mutex_);
@@ -384,15 +392,16 @@ namespace mkr {
         }
 
         /**
-         * Perform the mapper operation on a key-value pair.
-         * @tparam MapperOutput The return type of the mapper function.
-         * @param _key The key of the pair to perform the mapper function on.
-         * @param _mapper The mapper function to perform on the key-value pair.
-         * @return The result of the mapper function.
-         */
+          * Perform a mapping operation on a value specified by a key. If the key does not exists, a std::nullopt is returned.
+          * read_and_map does not allow modifying of the value in the threadsafe_hashtable.
+          * @tparam Mapper The type of mapper function. Takes in the value as a parameter.
+          * @param _key The key of the value.
+          * @param _mapper The mapper function.
+          * @return An std::optional containing the return value of the mapper function if the key exists. Else, returns a std::nullopt.
+          */
         template<typename Mapper>
-        std::optional<std::invoke_result_t<Mapper, const V&>>
-        read_and_map(const K& _key, Mapper&& _mapper) const requires mkr::is_function<Mapper, const V&>
+        std::optional<std::invoke_result_t<Mapper, const V&>> read_and_map(const K& _key, Mapper&& _mapper) const
+            requires mkr::is_function<Mapper, const V&>
         {
             const bucket& b = get_bucket(_key);
             reader_lock b_lock(b.mutex_);
@@ -403,11 +412,14 @@ namespace mkr {
         }
 
         /**
-         * Perform the consumer operation on each value in the hashtable.
-         * @param _consumer Consumer to operate on the values.
-         */
+          * Perform the consumer operation on each value in the hashtable.
+          * write_each allows modifying the values on the threadsafe_hashtable.
+          * @tparam Consumer The typename of the consumer function.
+          * @param _consumer Consumer to operate on the values.
+          */
         template<class Consumer>
-        void write_each(Consumer&& _consumer) requires mkr::is_consumer<Consumer, const K&, V&>
+        void write_each(Consumer&& _consumer)
+            requires mkr::is_consumer<Consumer, const K&, V&>
         {
             for (size_t i = 0; i<N; ++i) {
                 bucket& b = buckets_[i];
@@ -422,11 +434,14 @@ namespace mkr {
         }
 
         /**
-         * Perform the consumer operation on each value in the hashtable.
-         * @param _consumer Consumer to operate on the values.
-         */
+          * Perform the consumer operation on each value in the hashtable.
+          * read_each does not allow modifying the values on the threadsafe_hashtable.
+          * @tparam Consumer The typename of the consumer function.
+          * @param _consumer Consumer to operate on the values.
+          */
         template<class Consumer>
-        void read_each(Consumer&& _consumer) const requires mkr::is_consumer<Consumer, const K&, const V&>
+        void read_each(Consumer&& _consumer) const
+            requires mkr::is_consumer<Consumer, const K&, const V&>
         {
             for (size_t i = 0; i<N; ++i) {
                 const bucket& b = buckets_[i];
