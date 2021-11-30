@@ -9,6 +9,7 @@
 #include "../util/concepts.h"
 
 #include <memory>
+#include <mutex>
 #include <shared_mutex>
 #include <atomic>
 #include <optional>
