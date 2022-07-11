@@ -1,3 +1,36 @@
-.idea/
-cmake-build-debug/
-docs/
+# Prerequisites
+*.d
+
+# Compiled Object Files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic Libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran Module Files
+*.mod
+*.smod
+
+# Compiled Static Libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Bazel Generated Files
+.clwb
+bazel-*

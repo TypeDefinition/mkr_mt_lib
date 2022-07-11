@@ -1,7 +1,7 @@
-# mkr_multithread_library
+# mkr_mt_lib
 
 <p>
-Simple C++ multithread library.
+Simple C++ multi-thread library.
 
 Helpful Links:
 - CppCon 2017: Ansel Sermersheim “Multithreading is the answer. What is the question?" [https://www.youtube.com/watch?v=sDLQWivf1-I]

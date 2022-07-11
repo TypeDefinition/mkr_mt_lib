@@ -1,9 +1,4 @@
-//
-// Created by lnxterry on 19/12/20.
-//
-
-#ifndef MKR_MULTITHREAD_LIBRARY_TASK_H
-#define MKR_MULTITHREAD_LIBRARY_TASK_H
+#pragma once
 
 #include <functional>
 #include <memory>
@@ -92,5 +87,3 @@ namespace mkr {
         task& operator=(const task&) = delete;
     };
 }
-
-#endif //MKR_MULTITHREAD_LIBRARY_TASK_H

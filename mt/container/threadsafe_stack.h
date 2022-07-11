@@ -1,17 +1,11 @@
-//
-// Created by lnxterry on 8/12/20.
-//
-
-#ifndef MKR_MULTITHREAD_LIBRARY_THREADSAFE_STACK_H
-#define MKR_MULTITHREAD_LIBRARY_THREADSAFE_STACK_H
-
-#include "container.h"
-#include "../util/concepts.h"
+#pragma once
 
 #include <memory>
 #include <mutex>
 #include <atomic>
 #include <condition_variable>
+#include "common/concepts.h"
+#include "container.h"
 
 namespace mkr {
     /**
@@ -225,5 +219,3 @@ namespace mkr {
         size_t size() const { return num_elements_.load(); }
     };
 }
-
-#endif //MKR_MULTITHREAD_LIBRARY_THREADSAFE_STACK_H
