@@ -158,7 +158,7 @@ namespace mkr {
             std::future<result_t> result = p_task.get_future();
 
             // Get the worker index of this thread.
-            // If the task was submitted from a non-worker thread, it will not have a worker index.
+            // If the task was submitted from a non worker thread, it will not have a worker index.
             // In that case, add the task to the global queue.
             std::shared_ptr<size_t> worker_index = worker_index_lookup_.get(std::this_thread::get_id());
             if (worker_index) {
