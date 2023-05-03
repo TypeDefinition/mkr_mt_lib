@@ -1,12 +1,18 @@
-#pragma once
+//
+// Created by lnxterry on 16/12/20.
+//
+
+#ifndef MKR_MULTITHREAD_LIBRARY_THREAD_POOL_H
+#define MKR_MULTITHREAD_LIBRARY_THREAD_POOL_H
+
+#include "task.h"
+#include "../container/threadsafe_hashtable.h"
+#include "../container/threadsafe_queue.h"
+#include "../container/threadsafe_stack.h"
 
 #include <thread>
 #include <future>
 #include <latch>
-#include "mt/container/threadsafe_hashtable.h"
-#include "mt/container/threadsafe_queue.h"
-#include "mt/container/threadsafe_stack.h"
-#include "task.h"
 
 namespace mkr {
     /**
@@ -182,3 +188,5 @@ namespace mkr {
         }
     };
 }
+
+#endif //MKR_MULTITHREAD_LIBRARY_THREAD_POOL_H

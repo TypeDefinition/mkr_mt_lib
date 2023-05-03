@@ -1,10 +1,15 @@
-#pragma once
+//
+// Created by lnxterry on 17/1/21.
+//
 
-#include "common/family.h"
-#include "common/comparators.h"
-#include "mt/container/threadsafe_hashtable.h"
-#include "mt/container/threadsafe_list.h"
+#ifndef MKR_MULTITHREAD_LIBRARY_EVENT_DISPATCHER_H
+#define MKR_MULTITHREAD_LIBRARY_EVENT_DISPATCHER_H
+
 #include "event_listener.h"
+#include "../container/threadsafe_hashtable.h"
+#include "../container/threadsafe_list.h"
+#include "../util/category.h"
+#include "../util/comparators.h"
 
 namespace mkr {
     /**
@@ -23,11 +28,11 @@ namespace mkr {
         /**
          * Constructs the event dispatcher.
          */
-        event_dispatcher() = default;
+        event_dispatcher() { }
         /**
          * Destructs the event dispatcher.
          */
-        ~event_dispatcher() = default;
+        ~event_dispatcher() { }
 
         /**
          * Subscribes a listener to this dispatcher for this type of event.
@@ -88,3 +93,5 @@ namespace mkr {
         }
     };
 }
+
+#endif //MKR_MULTITHREAD_LIBRARY_EVENT_DISPATCHER_H

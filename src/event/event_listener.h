@@ -1,8 +1,14 @@
-#pragma once
+//
+// Created by lnxterry on 16/1/21.
+//
+
+#ifndef MKR_MULTITHREAD_LIBRARY_EVENT_LISTENER_H
+#define MKR_MULTITHREAD_LIBRARY_EVENT_LISTENER_H
+
+#include "event.h"
 
 #include <functional>
 #include <utility>
-#include "event.h"
 
 namespace mkr {
     /**
@@ -19,11 +25,11 @@ namespace mkr {
          * @param _callback The callback function to invoke when an event is sent.
          */
         event_listener(std::function<void(const event*)> _callback)
-                : callback_{std::move(_callback)} { }
+                :callback_{std::move(_callback)} { }
         /**
          * Destructs the event.
          */
-        ~event_listener() = default;
+        ~event_listener() { }
 
         /**
          * Invoke the callback.
@@ -35,3 +41,5 @@ namespace mkr {
         }
     };
 }
+
+#endif //MKR_MULTITHREAD_LIBRARY_EVENT_LISTENER_H
