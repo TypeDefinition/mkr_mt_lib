@@ -1,9 +1,4 @@
-//
-// Created by lnxterry on 16/1/21.
-//
-
-#ifndef MKR_MULTITHREAD_LIBRARY_EVENT_LISTENER_H
-#define MKR_MULTITHREAD_LIBRARY_EVENT_LISTENER_H
+#pragma once
 
 #include "event.h"
 
@@ -41,5 +36,3 @@ namespace mkr {
         }
     };
 }
-
-#endif //MKR_MULTITHREAD_LIBRARY_EVENT_LISTENER_H

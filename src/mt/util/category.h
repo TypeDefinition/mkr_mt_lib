@@ -1,9 +1,4 @@
-//
-// Created by lnxterry on 18/1/21.
-//
-
-#ifndef MKR_MULTITHREAD_LIBRARY_CATEGORY_H
-#define MKR_MULTITHREAD_LIBRARY_CATEGORY_H
+#pragma once
 
 #include <atomic>
 #include <type_traits>
@@ -53,5 +48,3 @@ namespace mkr {
 
 #define CATEGORY_ID(__BASE__, __DERIVED__) category<__BASE__>::get_id< __DERIVED__>()
 }
-
-#endif //MKR_MULTITHREAD_LIBRARY_CATEGORY_H

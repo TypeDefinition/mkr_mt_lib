@@ -1,4 +1,5 @@
 # mkr_multithread_library
+## WARNING: THIS WAS MADE FOR MY PERSONAL LEARNING AND IS HIGHLY EXPERIMENTAL. EXPECT BUGS.
 
 <p>
 Simple C++ multithread library.

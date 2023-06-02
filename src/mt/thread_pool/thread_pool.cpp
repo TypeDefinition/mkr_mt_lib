@@ -1,6 +1,4 @@
-//
-// Created by lnxterry on 16/12/20.
-//
+#pragma once
 
 #include "thread_pool.h"
 

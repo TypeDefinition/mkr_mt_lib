@@ -1,9 +1,4 @@
-//
-// Created by lnxterry on 16/12/20.
-//
-
-#ifndef MKR_MULTITHREAD_LIBRARY_THREAD_POOL_H
-#define MKR_MULTITHREAD_LIBRARY_THREAD_POOL_H
+#pragma once
 
 #include "task.h"
 #include "../container/threadsafe_hashtable.h"
@@ -188,5 +183,3 @@ namespace mkr {
         }
     };
 }
-
-#endif //MKR_MULTITHREAD_LIBRARY_THREAD_POOL_H

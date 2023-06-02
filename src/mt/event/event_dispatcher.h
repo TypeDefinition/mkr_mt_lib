@@ -1,15 +1,10 @@
-//
-// Created by lnxterry on 17/1/21.
-//
-
-#ifndef MKR_MULTITHREAD_LIBRARY_EVENT_DISPATCHER_H
-#define MKR_MULTITHREAD_LIBRARY_EVENT_DISPATCHER_H
+#pragma once
 
 #include "event_listener.h"
-#include "../container/threadsafe_hashtable.h"
-#include "../container/threadsafe_list.h"
-#include "../util/category.h"
-#include "../util/comparators.h"
+#include "mt/container/threadsafe_hashtable.h"
+#include "mt/container/threadsafe_list.h"
+#include "mt/util/category.h"
+#include "mt/util/comparators.h"
 
 namespace mkr {
     /**
@@ -93,5 +88,3 @@ namespace mkr {
         }
     };
 }
-
-#endif //MKR_MULTITHREAD_LIBRARY_EVENT_DISPATCHER_H

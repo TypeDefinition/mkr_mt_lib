@@ -1,9 +1,4 @@
-//
-// Created by lnxterry on 22/2/21.
-//
-
-#ifndef MKR_MULTITHREAD_LIBRARY_CONCEPTS_H
-#define MKR_MULTITHREAD_LIBRARY_CONCEPTS_H
+#pragma once
 
 #include <functional>
 #include <concepts>
@@ -32,5 +27,3 @@ namespace mkr {
         { std::invoke(_function, _args...) } -> mkr::not_same_as<void>;
     };
 }
-
-#endif //MKR_MULTITHREAD_LIBRARY_CONCEPTS_H

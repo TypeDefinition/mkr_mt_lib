@@ -1,12 +1,7 @@
-//
-// Created by lnxterry on 10/12/20.
-//
-
-#ifndef MKR_MULTITHREAD_LIBRARY_THREADSAFE_LIST_H
-#define MKR_MULTITHREAD_LIBRARY_THREADSAFE_LIST_H
+#pragma once
 
 #include "container.h"
-#include "../util/concepts.h"
+#include "mt/util/concepts.h"
 
 #include <memory>
 #include <mutex>
@@ -605,5 +600,3 @@ namespace mkr {
         size_t size() const { return num_elements_.load(); }
     };
 }
-
-#endif //MKR_MULTITHREAD_LIBRARY_THREADSAFE_LIST_H

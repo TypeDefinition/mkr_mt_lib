@@ -1,12 +1,6 @@
-//
-// Created by lnxterry on 10/12/20.
-//
-
-#ifndef MKR_MULTITHREAD_LIBRARY_RW_GUARD_H
-#define MKR_MULTITHREAD_LIBRARY_RW_GUARD_H
+#pragma once
 
 #include "guard_handle.h"
-
 #include <memory>
 #include <shared_mutex>
 #include <functional>
@@ -173,5 +167,3 @@ namespace mkr {
         }
     };
 }
-
-#endif //MKR_MULTITHREAD_LIBRARY_RW_GUARD_H

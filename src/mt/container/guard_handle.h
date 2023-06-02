@@ -1,9 +1,4 @@
-//
-// Created by lnxterry on 12/12/20.
-//
-
-#ifndef MKR_MULTITHREAD_LIBRARY_GUARD_HANDLE_H
-#define MKR_MULTITHREAD_LIBRARY_GUARD_HANDLE_H
+#pragma once
 
 #include <utility>
 
@@ -141,5 +136,3 @@ namespace mkr {
         }
     };
 }
-
-#endif //MKR_MULTITHREAD_LIBRARY_GUARD_HANDLE_H

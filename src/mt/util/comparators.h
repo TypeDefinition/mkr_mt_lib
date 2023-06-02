@@ -1,9 +1,4 @@
-//
-// Created by lnxterry on 18/1/21.
-//
-
-#ifndef MKR_MULTITHREAD_LIBRARY_COMPARATORS_H
-#define MKR_MULTITHREAD_LIBRARY_COMPARATORS_H
+#pragma once
 
 #include <utility>
 
@@ -93,5 +88,3 @@ namespace mkr {
         bool operator()(T&& _value) { return _value<value_ || value_==_value; }
     };
 }
-
-#endif //MKR_MULTITHREAD_LIBRARY_COMPARATORS_H

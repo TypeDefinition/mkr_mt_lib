@@ -1,9 +1,4 @@
-//
-// Created by lnxterry on 24/1/21.
-//
-
-#ifndef MKR_MULTITHREAD_LIBRARY_HANDLE_SET_H
-#define MKR_MULTITHREAD_LIBRARY_HANDLE_SET_H
+#pragma once
 
 #include <vector>
 #include <mutex>
@@ -147,5 +142,3 @@ namespace mkr {
         }
     };
 }
-
-#endif //MKR_MULTITHREAD_LIBRARY_HANDLE_SET_H
