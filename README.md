@@ -11,7 +11,7 @@ Documentation: https://typedefinition.github.io/mkr_mt_lib/
 - Threadsafe Queue
 - Threadsafe List
 - Threadsafe Hashtable
-- Job-stealing task pool.
+- Job-stealing thread pool.
 
 ### Single-thread vs Multi-thread Mergesort Results
 ![Mergesort Results](media/Mergesort_Results.png)
