@@ -4,7 +4,7 @@
 using namespace mkr;
 
 TEST(mergesort, correctness) {
-    const int array_size = 5000000;
+    const int array_size = 10000000;
 
     int *unsorted_array = new int[array_size];
     // Fill the unsorted array with random numbers.
@@ -35,11 +35,11 @@ TEST(mergesort, correctness) {
 
     // mkr::thread_pool
     {
-        std::cout << "Merge Sort " << array_size << " Numbers (mkr::thread_pool - " << std::thread::hardware_concurrency() << " Threads)" << std::endl;
-
         thread_pool tp{};
+        std::cout << "Merge Sort " << array_size << " Numbers (mkr::thread_pool - " << tp.num_threads() << " Threads)" << std::endl;
+
         auto start_time = std::chrono::high_resolution_clock::now();
-        mergesort_test::thread_pool_mergesort(&tp_sorted_array[0], &temp_buffer[0], 0, array_size, &tp, 2000);
+        mergesort_test::thread_pool_mergesort(&tp_sorted_array[0], &temp_buffer[0], 0, array_size, &tp, 500);
         auto end_time = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
 
