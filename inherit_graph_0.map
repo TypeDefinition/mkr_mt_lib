@@ -1,10 +1,17 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classmkr_1_1container.html" title=" " alt="" coords="5,225,123,251"/>
-<area shape="rect" id="node2" href="$classmkr_1_1threadsafe__hashtable.html" title=" " alt="" coords="178,5,375,47"/>
-<area shape="rect" id="node3" href="$classmkr_1_1threadsafe__list.html" title=" " alt="" coords="171,71,383,127"/>
-<area shape="rect" id="node4" href="$classmkr_1_1threadsafe__queue.html" title=" " alt="" coords="190,152,363,193"/>
-<area shape="rect" id="node5" href="$classmkr_1_1threadsafe__hashtable.html" title=" " alt="" coords="178,217,375,259"/>
-<area shape="rect" id="node6" href="$classmkr_1_1threadsafe__list.html" title=" " alt="" coords="181,283,372,310"/>
-<area shape="rect" id="node7" href="$classmkr_1_1threadsafe__queue.html" title=" " alt="" coords="171,334,382,361"/>
-<area shape="rect" id="node8" href="$classmkr_1_1threadsafe__stack.html" title=" " alt="" coords="173,385,380,411"/>
+<area shape="rect" id="Node000000" href="$classmkr_1_1container.html" title=" " alt="" coords="5,221,123,246"/>
+<area shape="rect" id="Node000001" href="$classmkr_1_1threadsafe__hashtable.html" title=" " alt="" coords="178,5,375,45"/>
+<area shape="poly" id="edge1_Node000000_Node000001" title=" " alt="" coords="71,207,85,172,106,132,134,91,169,55,188,43,191,48,172,59,138,94,111,134,90,175,76,209"/>
+<area shape="rect" id="Node000002" href="$classmkr_1_1threadsafe__list.html" title=" " alt="" coords="171,70,383,125"/>
+<area shape="poly" id="edge2_Node000000_Node000002" title=" " alt="" coords="84,208,122,171,169,135,193,122,196,127,172,140,125,176,88,212"/>
+<area shape="rect" id="Node000003" href="$classmkr_1_1threadsafe__queue.html" title=" " alt="" coords="190,149,363,189"/>
+<area shape="poly" id="edge3_Node000000_Node000003" title=" " alt="" coords="119,214,209,187,210,192,121,219"/>
+<area shape="rect" id="Node000004" href="$classmkr_1_1threadsafe__hashtable.html" title=" " alt="" coords="178,213,375,253"/>
+<area shape="poly" id="edge4_Node000000_Node000004" title=" " alt="" coords="136,231,178,231,178,236,136,236"/>
+<area shape="rect" id="Node000005" href="$classmkr_1_1threadsafe__list.html" title=" " alt="" coords="181,278,372,303"/>
+<area shape="poly" id="edge5_Node000000_Node000005" title=" " alt="" coords="119,247,171,263,221,275,220,281,170,268,117,253"/>
+<area shape="rect" id="Node000006" href="$classmkr_1_1threadsafe__queue.html" title=" " alt="" coords="171,327,382,353"/>
+<area shape="poly" id="edge6_Node000000_Node000006" title=" " alt="" coords="90,254,127,284,172,312,206,325,204,330,169,317,124,289,87,258"/>
+<area shape="rect" id="Node000007" href="$classmkr_1_1threadsafe__stack.html" title=" " alt="" coords="173,377,380,402"/>
+<area shape="poly" id="edge7_Node000000_Node000007" title=" " alt="" coords="81,256,117,310,143,338,172,362,199,374,196,379,169,366,139,342,113,314,76,259"/>
 </map>

@@ -1,7 +1,23 @@
 <map id="mkr::threadsafe_hashtable&lt; K, V, N &gt;::bucket" name="mkr::threadsafe_hashtable&lt; K, V, N &gt;::bucket">
-<area shape="rect" id="node1" title=" " alt="" coords="35,881,232,973"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,624,165,701"/>
-<area shape="rect" id="node3" href="$classmkr_1_1threadsafe__list.html" title=" " alt="" coords="190,507,402,819"/>
-<area shape="rect" id="node4" href="$classmkr_1_1container.html" title=" " alt="" coords="209,5,327,97"/>
-<area shape="rect" id="node5" href="$classmkr_1_1threadsafe__list.html" title=" " alt="" coords="290,147,481,429"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,1636,195,1716"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="115,13,267,78"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,80,124,102,103,128,87,157,81,190,81,1267,87,1462,98,1620,93,1620,82,1462,76,1267,76,189,82,155,98,125,120,98,144,76"/>
+<area shape="rect" id="Node000005" href="$structmkr_1_1threadsafe__list_1_1node.html" title=" " alt="" coords="390,151,535,231"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="252,76,376,141,374,146,249,81"/>
+<area shape="rect" id="Node000003" href="$classmkr_1_1threadsafe__list.html" title=" " alt="" coords="155,959,359,1573"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="158,1533,123,1621,119,1619,153,1531"/>
+<area shape="rect" id="Node000004" href="$classmkr_1_1container.html" title=" " alt="" coords="126,148,237,233"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="184,247,190,520,197,699,209,881,217,958,212,959,204,882,192,700,184,520,179,247"/>
+<area shape="rect" id="Node000009" href="$classmkr_1_1threadsafe__list.html" title=" " alt="" coords="219,296,405,881"/>
+<area shape="poly" id="edge10_Node000009_Node000004" title=" " alt="" coords="202,246,221,304,216,306,197,247"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="537,228,572,257,600,295,637,377,661,451,675,519,678,585,671,651,655,721,631,797,600,882,580,926,557,969,500,1048,436,1119,374,1178,370,1174,433,1115,496,1045,552,966,576,924,595,880,626,795,650,719,666,650,672,585,669,520,656,452,632,379,595,297,569,261,534,232"/>
+<area shape="poly" id="edge11_Node000009_Node000005" title=" " alt="" coords="450,232,414,328,409,326,445,230"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="309,13,430,78"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="392,77,431,135,426,138,388,80"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="455,5,657,85"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="533,87,499,138,495,135,528,84"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="261,158,365,223"/>
+<area shape="poly" id="edge8_Node000003_Node000008" title=" " alt="" coords="360,221,378,231,400,237,420,238,438,241,455,256,463,273,470,300,478,378,481,479,480,592,471,807,464,888,456,935,440,983,419,1030,371,1118,366,1115,415,1028,435,981,451,934,458,887,465,807,475,591,475,479,472,379,464,301,458,275,451,259,436,246,419,243,399,242,376,236,358,226"/>
+<area shape="poly" id="edge12_Node000009_Node000008" title=" " alt="" coords="282,225,263,258,263,272,263,280,258,280,257,272,257,257,278,222"/>
+<area shape="poly" id="edge9_Node000003_Node000009" title=" " alt="" coords="262,895,261,906,258,958,252,958,256,905,257,895"/>
 </map>

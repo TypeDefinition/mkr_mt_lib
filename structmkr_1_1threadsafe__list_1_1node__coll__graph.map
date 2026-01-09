@@ -1,6 +1,9 @@
 <map id="mkr::threadsafe_list&lt; T &gt;::node" name="mkr::threadsafe_list&lt; T &gt;::node">
-<area shape="rect" id="node1" title=" " alt="" coords="243,160,397,252"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,5,216,97"/>
-<area shape="rect" id="node3" title=" " alt="" coords="240,13,400,90"/>
-<area shape="rect" id="node4" title=" " alt="" coords="425,13,554,90"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="170,148,315,228"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,13,157,78"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,76,187,135,184,139,116,80"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="182,13,303,78"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="245,78,245,132,240,132,240,78"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="328,5,531,85"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="379,88,309,140,306,136,376,84"/>
 </map>

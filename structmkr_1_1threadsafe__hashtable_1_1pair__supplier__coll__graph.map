@@ -1,5 +1,7 @@
 <map id="mkr::threadsafe_hashtable&lt; K, V, N &gt;::pair_supplier" name="mkr::threadsafe_hashtable&lt; K, V, N &gt;::pair_supplier">
-<area shape="rect" id="node1" title=" " alt="" coords="14,145,211,252"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,5,89,83"/>
-<area shape="rect" id="node3" title=" " alt="" coords="114,5,245,83"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="10,133,199,233"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,81,71"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="59,70,80,117,75,119,54,72"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="106,5,229,71"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="156,72,135,119,130,117,151,70"/>
 </map>

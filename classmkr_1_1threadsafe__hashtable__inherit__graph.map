@@ -1,5 +1,7 @@
 <map id="mkr::threadsafe_hashtable&lt; K, V, N &gt;" name="mkr::threadsafe_hashtable&lt; K, V, N &gt;">
-<area shape="rect" id="node1" title=" " alt="" coords="5,147,204,561"/>
-<area shape="rect" id="node3" href="$classmkr_1_1threadsafe__hashtable.html" title=" " alt="" coords="5,639,204,1053"/>
-<area shape="rect" id="node2" href="$classmkr_1_1container.html" title=" " alt="" coords="45,5,164,97"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,140,196,820"/>
+<area shape="rect" id="Node000003" href="$classmkr_1_1threadsafe__hashtable.html" title=" " alt="" coords="5,897,196,1577"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="103,834,103,897,98,897,98,834"/>
+<area shape="rect" id="Node000002" href="$classmkr_1_1container.html" title=" " alt="" coords="45,5,156,91"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,104,103,140,98,140,98,104"/>
 </map>

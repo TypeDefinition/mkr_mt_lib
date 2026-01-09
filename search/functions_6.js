@@ -1,4 +1,11 @@
 var searchData=
 [
-  ['num_5fthreads_176',['num_threads',['../classmkr_1_1thread__pool.html#af889486871cef902c0d9b69d21550370',1,'mkr::thread_pool']]]
+  ['insert_0',['insert',['../classmkr_1_1threadsafe__hashtable.html#a799a5a36122b7a303d809ca6ec699598',1,'mkr::threadsafe_hashtable::insert(const K &amp;_key, const V &amp;_value)'],['../classmkr_1_1threadsafe__hashtable.html#ad1828431965afb24b68b541d55875c05',1,'mkr::threadsafe_hashtable::insert(const K &amp;_key, V &amp;&amp;_value)']]],
+  ['insert_5for_5freplace_1',['insert_or_replace',['../classmkr_1_1threadsafe__hashtable.html#a3f447c40977c4f4ef6ae4c2c6c2c3e6f',1,'mkr::threadsafe_hashtable::insert_or_replace(const K &amp;_key, const V &amp;_value)'],['../classmkr_1_1threadsafe__hashtable.html#a5d8b9715733e216f5553354a749e806b',1,'mkr::threadsafe_hashtable::insert_or_replace(const K &amp;_key, V &amp;&amp;_value)']]],
+  ['is_5fequal_2',['is_equal',['../classmkr_1_1is__equal.html#a942dce859f3c5a74d757609f90d4b30c',1,'mkr::is_equal::is_equal(const T &amp;_value)'],['../classmkr_1_1is__equal.html#af8d34b076a38c51a89673614d1c9fc41',1,'mkr::is_equal::is_equal(T &amp;&amp;_value)']]],
+  ['is_5ffuture_5fready_3',['is_future_ready',['../namespacemkr.html#ab23ece96b3478eddb83ee9d341bab367',1,'mkr']]],
+  ['is_5fgreater_4',['is_greater',['../classmkr_1_1is__greater.html#a2f066754ecc72e1cdb02f6b786a7b1df',1,'mkr::is_greater::is_greater(const T &amp;_value)'],['../classmkr_1_1is__greater.html#aa5d3ad4356cf959cb8c2f9722f4a2d14',1,'mkr::is_greater::is_greater(T &amp;&amp;_value)']]],
+  ['is_5fgreater_5for_5fequal_5',['is_greater_or_equal',['../classmkr_1_1is__greater__or__equal.html#a4167e87359e5cc68b51724d958456464',1,'mkr::is_greater_or_equal::is_greater_or_equal(const T &amp;_value)'],['../classmkr_1_1is__greater__or__equal.html#a40df7f20dc52063dbdfcbb97a079972c',1,'mkr::is_greater_or_equal::is_greater_or_equal(T &amp;&amp;_value)']]],
+  ['is_5flesser_6',['is_lesser',['../classmkr_1_1is__lesser.html#afc0e47ff51af4b69f8634e4bc2408f85',1,'mkr::is_lesser::is_lesser(const T &amp;_value)'],['../classmkr_1_1is__lesser.html#a46e5d9d68dc9e736e9d4ae3522bf3224',1,'mkr::is_lesser::is_lesser(T &amp;&amp;_value)']]],
+  ['is_5flesser_5for_5fequal_7',['is_lesser_or_equal',['../classmkr_1_1is__lesser__or__equal.html#a2d2089c724154b31c63a6b8549d901ae',1,'mkr::is_lesser_or_equal::is_lesser_or_equal(const T &amp;_value)'],['../classmkr_1_1is__lesser__or__equal.html#a62ba5590e1dc9a1356b47d232d1792b8',1,'mkr::is_lesser_or_equal::is_lesser_or_equal(T &amp;&amp;_value)']]]
 ];

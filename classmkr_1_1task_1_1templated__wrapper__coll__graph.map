@@ -1,5 +1,7 @@
 <map id="mkr::task::templated_wrapper&lt; Callable &gt;" name="mkr::task::templated_wrapper&lt; Callable &gt;">
-<area shape="rect" id="node1" title=" " alt="" coords="75,189,261,369"/>
-<area shape="rect" id="node2" href="$classmkr_1_1task_1_1wrapper__interface.html" title=" " alt="" coords="5,5,181,127"/>
-<area shape="rect" id="node3" title=" " alt="" coords="205,27,280,105"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="71,188,249,388"/>
+<area shape="rect" id="Node000002" href="$classmkr_1_1task_1_1wrapper__interface.html" title=" " alt="" coords="5,5,173,125"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,138,131,187,126,188,110,139"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="197,33,264,98"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="223,99,199,174,194,172,218,97"/>
 </map>

@@ -1,4 +1,15 @@
 <map id="mkr::threadsafe_list&lt; T &gt;" name="mkr::threadsafe_list&lt; T &gt;">
-<area shape="rect" id="node1" title=" " alt="" coords="5,147,196,429"/>
-<area shape="rect" id="node2" href="$classmkr_1_1container.html" title=" " alt="" coords="41,5,160,97"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="149,296,336,881"/>
+<area shape="rect" id="Node000002" href="$classmkr_1_1container.html" title=" " alt="" coords="35,148,146,233"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,245,152,343,147,345,109,247"/>
+<area shape="rect" id="Node000003" href="$structmkr_1_1threadsafe__list_1_1node.html" title=" " alt="" coords="170,151,315,231"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="245,231,245,279,240,279,240,231"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,13,157,78"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="119,76,188,138,185,142,115,80"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="182,13,303,78"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="245,78,245,135,240,135,240,78"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="328,5,531,85"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="380,88,308,143,305,139,377,84"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="340,158,444,223"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="383,224,344,326,339,324,378,222"/>
 </map>

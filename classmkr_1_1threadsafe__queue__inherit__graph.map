@@ -1,5 +1,7 @@
 <map id="mkr::threadsafe_queue&lt; T &gt;" name="mkr::threadsafe_queue&lt; T &gt;">
-<area shape="rect" id="node1" title=" " alt="" coords="5,147,216,517"/>
-<area shape="rect" id="node3" href="$classmkr_1_1threadsafe__queue.html" title=" " alt="" coords="23,580,198,965"/>
-<area shape="rect" id="node2" href="$classmkr_1_1container.html" title=" " alt="" coords="51,5,170,97"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,140,208,645"/>
+<area shape="rect" id="Node000003" href="$classmkr_1_1threadsafe__queue.html" title=" " alt="" coords="23,708,190,1228"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="109,659,109,708,104,708,104,659"/>
+<area shape="rect" id="Node000002" href="$classmkr_1_1container.html" title=" " alt="" coords="51,5,162,91"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,104,109,140,104,140,104,104"/>
 </map>
